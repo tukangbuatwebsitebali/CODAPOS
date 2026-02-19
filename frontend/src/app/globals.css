@@ -1,0 +1,836 @@
+@import "tailwindcss";
+
+:root {
+  --codapos-blue: #1DA1F2;
+  --codapos-blue-light: #4DB5F5;
+  --codapos-blue-dark: #0C85D0;
+  --codapos-blue-gradient: linear-gradient(135deg, #1DA1F2, #A7D8FF);
+
+  --background: #0a0a0f;
+  --foreground: #f5f5f7;
+  --card-bg: rgba(255, 255, 255, 0.06);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-hover: rgba(255, 255, 255, 0.1);
+  --sidebar-bg: rgba(15, 15, 25, 0.95);
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-hover: rgba(255, 255, 255, 0.08);
+
+  --text-primary: #f5f5f7;
+  --text-secondary: rgba(245, 245, 247, 0.6);
+  --text-muted: rgba(245, 245, 247, 0.35);
+
+  --success: #34C759;
+  --warning: #FF9500;
+  --danger: #FF3B30;
+  --info: #007AFF;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-codapos: var(--codapos-blue);
+  --color-codapos-light: var(--codapos-blue-light);
+  --color-codapos-dark: var(--codapos-blue-dark);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ========== GLASSMORPHISM SYSTEM ========== */
+
+.glass {
+  background: rgba(20, 20, 35, 0.85);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-xl);
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.glass-strong {
+  background: rgba(25, 25, 45, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-xl);
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.glass-subtle {
+  background: rgba(15, 15, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.glass-sidebar {
+  background: rgba(12, 12, 22, 0.97);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+/* ========== BUTTONS ========== */
+
+.btn-primary {
+  background: var(--codapos-blue-gradient);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(29, 161, 242, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(29, 161, 242, 0.5);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 12px 24px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-hover);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+/* ========== INPUTS ========== */
+
+.input-glass {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.3s ease;
+  outline: none;
+  width: 100%;
+  pointer-events: auto;
+  position: relative;
+  z-index: 5;
+}
+
+.input-glass::placeholder {
+  color: var(--text-muted);
+}
+
+.input-glass:focus {
+  border-color: var(--codapos-blue);
+  box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ========== ANIMATIONS ========== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(29, 161, 242, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(29, 161, 242, 0.6);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.4s ease-out forwards;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.5s ease-out forwards;
+}
+
+/* Staggered animations */
+.stagger-1 {
+  animation-delay: 0.1s;
+}
+
+.stagger-2 {
+  animation-delay: 0.2s;
+}
+
+.stagger-3 {
+  animation-delay: 0.3s;
+}
+
+.stagger-4 {
+  animation-delay: 0.4s;
+}
+
+.stagger-5 {
+  animation-delay: 0.5s;
+}
+
+/* ========== STAT CARDS ========== */
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--codapos-blue-gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+/* ========== BACKGROUND EFFECTS ========== */
+
+.bg-gradient-mesh {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(29, 161, 242, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(29, 161, 242, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(167, 216, 255, 0.05) 0%, transparent 70%);
+}
+
+.bg-pattern {
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* ========== POS GRID ========== */
+
+.pos-product-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.pos-product-card:hover {
+  transform: translateY(-2px);
+  background: var(--card-hover);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pos-product-card:active {
+  transform: scale(0.97);
+}
+
+/* ========== TABLES ========== */
+
+.table-glass {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-glass th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.table-glass td {
+  padding: 14px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.table-glass tr:hover td {
+  background: var(--surface-hover);
+}
+
+/* ========== BADGES ========== */
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-success {
+  background: rgba(52, 199, 89, 0.15);
+  color: var(--success);
+}
+
+.badge-warning {
+  background: rgba(255, 149, 0, 0.15);
+  color: var(--warning);
+}
+
+.badge-danger {
+  background: rgba(255, 59, 48, 0.15);
+  color: var(--danger);
+}
+
+.badge-info {
+  background: rgba(0, 122, 255, 0.15);
+  color: var(--info);
+}
+
+/* ========== STOREFRONT PREMIUM ANIMATIONS ========== */
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulseGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(196, 0, 0, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(196, 0, 0, 0);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.5s ease-out both;
+}
+
+.stagger-1 {
+  animation-delay: 0.05s;
+}
+
+.stagger-2 {
+  animation-delay: 0.1s;
+}
+
+.stagger-3 {
+  animation-delay: 0.15s;
+}
+
+.stagger-4 {
+  animation-delay: 0.2s;
+}
+
+.stagger-5 {
+  animation-delay: 0.25s;
+}
+
+.stagger-6 {
+  animation-delay: 0.3s;
+}
+
+.stagger-7 {
+  animation-delay: 0.35s;
+}
+
+.stagger-8 {
+  animation-delay: 0.4s;
+}
+
+.stagger-9 {
+  animation-delay: 0.45s;
+}
+
+.stagger-10 {
+  animation-delay: 0.5s;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.theme-card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.theme-card-hover:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.3);
+}
+
+.dropzone-active {
+  border-color: #C40000 !important;
+  background: rgba(196, 0, 0, 0.05) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LANDING PAGE — codapos.com
+   Light-themed marketing website styles
+   ═══════════════════════════════════════════════════════ */
+
+.landing-page {
+  background: #ffffff;
+  color: #1a1a2e;
+  min-height: 100vh;
+}
+
+/* Override dark scrollbar for landing */
+.landing-page *::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.landing-page * {
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+/* Container */
+.landing-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── Navbar ── */
+.landing-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.landing-nav-scrolled {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 1px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Buttons ── */
+.landing-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #00B894, #00CEC9);
+  color: white;
+  font-weight: 700;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+}
+
+.landing-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 184, 148, 0.4);
+}
+
+.landing-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: white;
+  color: #374151;
+  font-weight: 600;
+  border-radius: 16px;
+  border: 2px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.landing-btn-secondary:hover {
+  border-color: #00B894;
+  color: #00B894;
+  background: #f0fdf8;
+}
+
+/* ── Hero ── */
+.landing-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+.landing-hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0, 184, 148, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0, 206, 201, 0.08) 0%, transparent 50%),
+    linear-gradient(180deg, #f0fdf8 0%, #ffffff 100%);
+  z-index: 0;
+}
+
+.landing-hero-visual {
+  position: relative;
+  padding: 40px;
+}
+
+.landing-wave {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  z-index: 5;
+}
+
+.landing-wave svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── Floating Animation ── */
+.animate-float {
+  animation: landingFloat 4s ease-in-out infinite;
+}
+
+.animate-float-delay {
+  animation: landingFloat 4s ease-in-out 1.5s infinite;
+}
+
+@keyframes landingFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* ── Slide Down ── */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+
+  to {
+    opacity: 1;
+    max-height: 600px;
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out forwards;
+  overflow: hidden;
+}
+
+/* ── Slide In Right (toast) ── */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+/* ── Stat Cards ── */
+.landing-stat-card {
+  text-align: center;
+  padding: 32px 24px;
+  border-radius: 24px;
+  background: white;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.landing-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 184, 148, 0.1);
+  border-color: #00B894;
+}
+
+/* ── Business Type Cards ── */
+.landing-biz-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 16px;
+  background: white;
+  border-radius: 24px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.landing-biz-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+  border-color: transparent;
+}
+
+/* ── Feature Cards ── */
+.landing-feature-card {
+  padding: 28px;
+  background: white;
+  border-radius: 24px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.landing-feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px rgba(0, 184, 148, 0.1);
+  border-color: #00B894;
+}
+
+/* ── Pricing Cards ── */
+.landing-pricing-card {
+  position: relative;
+  padding: 36px;
+  background: white;
+  border-radius: 28px;
+  border: 2px solid #f1f5f9;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.landing-pricing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+}
+
+.landing-pricing-highlight {
+  border-color: #00B894;
+  box-shadow: 0 8px 30px rgba(0, 184, 148, 0.15);
+}
+
+.landing-pricing-highlight:hover {
+  box-shadow: 0 20px 50px rgba(0, 184, 148, 0.2);
+}
+
+/* ── Testimonial Cards ── */
+.landing-testimonial-card {
+  padding: 28px;
+  background: white;
+  border-radius: 24px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.landing-testimonial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* ── FAQ Cards ── */
+.landing-faq-card {
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.landing-faq-card:hover {
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+/* ── CTA Section ── */
+.landing-cta-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #00B894 0%, #00CEC9 50%, #81ECEC 100%);
+  z-index: 0;
+}
+
+.landing-cta-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 40%);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .landing-container {
+    padding: 0 16px;
+  }
+
+  .landing-hero {
+    min-height: auto;
+  }
+}

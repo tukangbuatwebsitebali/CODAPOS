@@ -1,0 +1,36 @@
+# ═══ Node / Frontend ═══
+node_modules/
+.next/
+out/
+.env
+.env.local
+.env.production
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ═══ Go / Backend ═══
+backend/tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# ═══ IDE ═══
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ═══ OS ═══
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ═══ Misc ═══
+*.log
+.gemini/
+flutter/
+.snapshots/
