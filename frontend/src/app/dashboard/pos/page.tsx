@@ -43,6 +43,7 @@ export default function POSPage() {
     const tenantRef = useRef<ReceiptTenant>({ name: "Toko" });
     const snapLoaded = useRef(false);
     const midtransConfig = useRef<{ clientKey: string; mode: string }>({ clientKey: "", mode: "sandbox" });
+    const [mobileCartOpen, setMobileCartOpen] = useState(false);
 
     const fetchProducts = useCallback(async () => {
         try {
@@ -299,9 +300,9 @@ export default function POSPage() {
     };
 
     return (
-        <div className="flex gap-4 h-[calc(100vh-7rem)] -m-6">
+        <div className="flex flex-col lg:flex-row gap-0 lg:gap-4 h-[calc(100vh-5rem)] md:h-[calc(100vh-7rem)] -m-3 sm:-m-4 md:-m-6">
             {/* LEFT: Product Grid */}
-            <div className="flex-1 flex flex-col p-6">
+            <div className="flex-1 flex flex-col p-3 sm:p-4 md:p-6 min-h-0">
                 {/* Search & Categories */}
                 <div className="flex flex-col gap-3 mb-4">
                     <div className="relative">
@@ -364,19 +365,50 @@ export default function POSPage() {
                 )}
             </div>
 
-            {/* RIGHT: Cart Panel */}
-            <div className="w-96 glass-sidebar flex flex-col border-l border-white/5">
+            {/* Mobile Cart Toggle Button */}
+            <button
+                onClick={() => setMobileCartOpen(true)}
+                className="lg:hidden fixed bottom-4 right-4 z-40 w-14 h-14 rounded-full bg-[#C40000] text-white shadow-2xl shadow-red-900/50 flex items-center justify-center hover:bg-[#E53030] transition-all active:scale-95"
+            >
+                <ShoppingBag className="w-6 h-6" />
+                {getItemCount() > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1.5 bg-white text-[#C40000] text-xs font-bold rounded-full flex items-center justify-center shadow">
+                        {getItemCount()}
+                    </span>
+                )}
+            </button>
+
+            {/* Mobile Cart Overlay */}
+            {mobileCartOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden" onClick={() => setMobileCartOpen(false)} />
+            )}
+
+            {/* RIGHT: Cart Panel — side panel on desktop, bottom drawer on mobile */}
+            <div className={`
+                fixed bottom-0 left-0 right-0 z-50 lg:relative lg:z-0
+                lg:w-96 glass-sidebar flex flex-col border-t lg:border-t-0 lg:border-l border-white/5
+                transition-transform duration-300 ease-in-out
+                h-[85vh] lg:h-auto rounded-t-3xl lg:rounded-none
+                ${mobileCartOpen ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
+            `}>
                 {/* Cart Header */}
-                <div className="p-5 border-b border-white/5 flex items-center justify-between">
+                <div className="p-4 sm:p-5 border-b border-white/5 flex items-center justify-between">
+                    {/* Mobile drag handle */}
+                    <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full bg-white/20 lg:hidden" />
                     <div>
                         <h2 className="text-lg font-bold text-white">Keranjang</h2>
                         <p className="text-xs text-white/30">{getItemCount()} item</p>
                     </div>
-                    {items.length > 0 && (
-                        <button onClick={clearCart} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1">
-                            <Trash2 className="w-3 h-3" /> Hapus
+                    <div className="flex items-center gap-2">
+                        {items.length > 0 && (
+                            <button onClick={clearCart} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1">
+                                <Trash2 className="w-3 h-3" /> Hapus
+                            </button>
+                        )}
+                        <button onClick={() => setMobileCartOpen(false)} className="lg:hidden text-white/30 hover:text-white p-1">
+                            <X className="w-5 h-5" />
                         </button>
-                    )}
+                    </div>
                 </div>
 
                 {/* Cart Items */}

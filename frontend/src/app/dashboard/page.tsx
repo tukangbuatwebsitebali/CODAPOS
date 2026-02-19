@@ -81,7 +81,7 @@ export default function DashboardPage() {
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <p className="text-xs text-white/40 font-medium uppercase tracking-wider">{stat.label}</p>
-                                            <p className="text-2xl font-bold text-white mt-2">{stat.value}</p>
+                                            <p className="text-xl sm:text-2xl font-bold text-white mt-2">{stat.value}</p>
                                         </div>
                                         <div
                                             className="w-10 h-10 rounded-xl flex items-center justify-center"
@@ -102,7 +102,7 @@ export default function DashboardPage() {
                     {/* Content Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Recent Transactions */}
-                        <div className="lg:col-span-2 glass p-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                        <div className="lg:col-span-2 glass p-4 sm:p-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-lg font-semibold text-white">Transaksi Terkini</h2>
                                 <Link href="/dashboard/transactions" className="text-xs text-[#C40000] hover:text-[#E53030] font-medium transition">
@@ -112,36 +112,40 @@ export default function DashboardPage() {
                             {recentTransactions.length === 0 ? (
                                 <p className="text-sm text-white/30 text-center py-8">Belum ada transaksi</p>
                             ) : (
-                                <table className="table-glass">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Waktu</th>
-                                            <th>Item</th>
-                                            <th>Total</th>
-                                            <th>Metode</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {recentTransactions.map((tx) => (
-                                            <tr key={tx.id}>
-                                                <td className="font-mono text-white/70">{tx.transaction_number}</td>
-                                                <td className="text-white/50">{formatDate(tx.created_at)}</td>
-                                                <td className="text-white/50">{tx.items?.length || 0} item</td>
-                                                <td className="font-medium text-white">{formatCurrency(tx.total_amount)}</td>
-                                                <td>
-                                                    <span className="badge badge-info">{tx.payments?.[0]?.payment_method || "—"}</span>
-                                                </td>
-                                                <td>
-                                                    <span className={`badge ${tx.status === "completed" ? "badge-success" : "badge-danger"}`}>
-                                                        {tx.status === "completed" ? "Selesai" : "Refund"}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                <div className="overflow-x-auto -mx-4 sm:-mx-6">
+                                    <div className="inline-block min-w-full px-4 sm:px-6">
+                                        <table className="table-glass">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Waktu</th>
+                                                    <th className="mobile-hide">Item</th>
+                                                    <th>Total</th>
+                                                    <th className="mobile-hide">Metode</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {recentTransactions.map((tx) => (
+                                                    <tr key={tx.id}>
+                                                        <td className="font-mono text-white/70 text-xs sm:text-sm">{tx.transaction_number}</td>
+                                                        <td className="text-white/50">{formatDate(tx.created_at)}</td>
+                                                        <td className="text-white/50 mobile-hide">{tx.items?.length || 0} item</td>
+                                                        <td className="font-medium text-white">{formatCurrency(tx.total_amount)}</td>
+                                                        <td className="mobile-hide">
+                                                            <span className="badge badge-info">{tx.payments?.[0]?.payment_method || "—"}</span>
+                                                        </td>
+                                                        <td>
+                                                            <span className={`badge ${tx.status === "completed" ? "badge-success" : "badge-danger"}`}>
+                                                                {tx.status === "completed" ? "Selesai" : "Refund"}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             )}
                         </div>
 

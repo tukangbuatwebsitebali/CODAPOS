@@ -16,7 +16,6 @@ import { useLanguageStore, useT, type Lang } from "@/lib/i18n";
 //  CODAPOS Landing Page — Premium Professional Design
 // ═══════════════════════════════════════════════════════════════
 
-// Hero slide illustrations (CSS-based visuals)
 const HERO_SLIDES = [
   {
     badgeKey: "hero.slide1.badge",
@@ -43,89 +42,6 @@ const HERO_SLIDES = [
     gradient: "from-[#0052D4] via-[#0088CC] to-[#00B4D8]",
   },
 ];
-
-const BUSINESS_TYPES = [
-  { name: "Kedai Kopi", emoji: "☕", desc: "Manajemen menu, stok bahan, laporan harian" },
-  { name: "Restoran", emoji: "🍽️", desc: "Multi-meja, split bill, kitchen display" },
-  { name: "Retail & Toko", emoji: "🛍️", desc: "Barcode, inventori, supplier management" },
-  { name: "Bakery & Kue", emoji: "🧁", desc: "Pre-order, resep, kalkulasi bahan" },
-  { name: "Barbershop & Salon", emoji: "💈", desc: "Booking, membership, komisi stylist" },
-  { name: "Apotek", emoji: "💊", desc: "Batch tracking, expired alert, resep" },
-  { name: "Laundry", emoji: "👕", desc: "Status cucian, pickup/delivery, notifikasi" },
-  { name: "Franchise", emoji: "🏪", desc: "Multi-outlet, royalti, standarisasi" },
-];
-
-const FEATURES = [
-  { icon: ShoppingCart, title: "POS Kasir Ultra-Cepat", desc: "Proses transaksi dalam hitungan detik. Scan barcode, pilih payment, cetak struk — semua dalam 3 tap.", gradient: "from-emerald-500 to-teal-600" },
-  { icon: Package, title: "Manajemen Inventori", desc: "Stok realtime, notifikasi stok menipis, transfer antar outlet, dan laporan pergerakan barang.", gradient: "from-blue-500 to-indigo-600" },
-  { icon: BarChart3, title: "Analitik & Laporan", desc: "Dashboard realtime dengan grafik penjualan, produk terlaris, laba-rugi, dan export ke PDF/Excel.", gradient: "from-violet-500 to-purple-600" },
-  { icon: CreditCard, title: "Multi-Payment Gateway", desc: "Terima QRIS, kartu kredit/debit, e-wallet, transfer bank via Midtrans. Rekonsiliasi otomatis.", gradient: "from-amber-500 to-orange-600" },
-  { icon: Truck, title: "Delivery & MyKurir", desc: "Sistem kurir internal dengan tracking GPS realtime, auto-assign driver, dan estimasi ongkir.", gradient: "from-rose-500 to-pink-600" },
-  { icon: Brain, title: "AI Forecasting", desc: "Prediksi penjualan dengan machine learning. Restock otomatis dan optimasi stok berdasarkan tren.", gradient: "from-cyan-500 to-blue-600" },
-  { icon: Printer, title: "Printer Thermal", desc: "Cetak struk via Bluetooth & USB. Kompatibel 58mm & 80mm, template kustom, auto-print.", gradient: "from-sky-500 to-cyan-600" },
-  { icon: Globe, title: "Toko Online Gratis", desc: "Storefront dengan 20+ tema premium. Custom domain, SEO friendly, checkout terintegrasi.", gradient: "from-indigo-500 to-violet-600" },
-];
-
-const SHOWCASE = [
-  { title: "Dashboard Analitik Realtime", desc: "Monitor omzet, penjualan, dan performa outlet dalam satu layar. Grafik interaktif dan insight AI.", features: ["Revenue harian/mingguan", "Produk terlaris", "Revenue per outlet", "Export PDF/Excel"], emoji: "📊" },
-  { title: "POS Kasir Modern", desc: "Interface kasir super cepat dan intuitif. Barcode scanner, split bill, multi-payment — 3 detik per transaksi.", features: ["Scan barcode & QR", "Split bill & diskon", "Multi payment method", "Auto-print struk"], emoji: "🛒" },
-  { title: "Multi-Outlet Manager", desc: "Kontrol semua cabang dari satu dashboard. Sinkronisasi real-time, harga per lokasi, transfer stok.", features: ["Sync stok antar outlet", "Harga berbeda per lokasi", "Transfer stok cabang", "Laporan per outlet"], emoji: "🏢" },
-];
-
-const TESTIMONIALS = [
-  { name: "Rina Andayani", role: "Owner, Kopi Nusantara", text: "CODAPOS mengubah cara kami mengelola 3 outlet. Laporan realtime dan POS super cepat benar-benar menghemat waktu 2 jam per hari!", rating: 5, avatar: "RA", gradient: "from-emerald-400 to-teal-500" },
-  { name: "Budi Santoso", role: "Manager, Toko Serba Ada", text: "Fitur inventory management-nya luar biasa. Notifikasi stok otomatis bikin kami tidak pernah kehabisan barang lagi. Revenue naik 30%!", rating: 5, avatar: "BS", gradient: "from-blue-400 to-indigo-500" },
-  { name: "Maya Putri", role: "Owner, Bakery House", text: "Dari kasir manual ke CODAPOS, peningkatannya drastis! AI Forecast membantu kami prepare bahan dengan tepat. Zero waste!", rating: 5, avatar: "MP", gradient: "from-violet-400 to-purple-500" },
-  { name: "Dimas Kurniawan", role: "CEO, Franchise Ayam Goreng", text: "Mengelola 12 outlet franchise jadi mudah. Royalti, standarisasi harga, semua otomatis. Sangat direkomendasikan!", rating: 5, avatar: "DK", gradient: "from-amber-400 to-orange-500" },
-];
-
-const PRICING = [
-  {
-    name: "Free", price: 0, period: "selamanya", desc: "Untuk bisnis baru yang baru memulai",
-    features: ["1 Outlet", "1 User", "30 Produk", "POS Kasir Dasar", "Laporan Sederhana", "1 Template Toko"],
-    highlight: false, icon: Sparkles,
-  },
-  {
-    name: "Pro", price: 99000, period: "/bulan", desc: "Untuk bisnis berkembang & franchise",
-    features: ["5 Outlet", "10 Users", "Unlimited Produk", "Semua Fitur POS", "Laporan Detail + AI", "20+ Template Premium", "Payment Gateway Midtrans", "Printer Bluetooth/USB", "MyKurir Delivery", "Custom Domain", "Support Prioritas 24/7"],
-    highlight: true, icon: Crown,
-  },
-];
-
-const FAQS = [
-  { q: "Apakah CODAPOS benar-benar gratis?", a: "Ya! Paket Free bisa digunakan selamanya tanpa biaya. Anda hanya perlu upgrade ke Pro jika membutuhkan fitur lebih seperti multi-outlet dan payment gateway." },
-  { q: "Apakah data saya aman?", a: "100% aman. Kami menggunakan enkripsi end-to-end, server yang tersertifikasi ISO 27001, dan backup otomatis setiap hari. Uptime 99.9% guaranteed." },
-  { q: "Bisa dipakai di HP dan tablet?", a: "Ya, CODAPOS berjalan di browser modern dan responsive untuk semua ukuran layar. Bisa diakses dari smartphone, tablet, maupun desktop." },
-  { q: "Bagaimana cara migrasi dari POS lain?", a: "Tim kami akan membantu migrasi data Anda secara gratis. Import data via CSV/Excel. Proses biasanya selesai dalam 1-2 hari kerja." },
-  { q: "Apakah bisa pakai printer struk?", a: "Ya, CODAPOS mendukung printer thermal 58mm & 80mm via Bluetooth dan USB. Struk bisa di-customize dengan logo dan informasi toko Anda." },
-];
-
-const FOOTER_LINKS = {
-  Produk: [
-    { label: "POS Kasir", href: "/about" },
-    { label: "Manajemen Stok", href: "/about" },
-    { label: "Laporan", href: "/about" },
-    { label: "Toko Online", href: "/about" },
-    { label: "Delivery", href: "/about" },
-  ],
-  Perusahaan: [
-    { label: "Tentang Kami", href: "/about" },
-    { label: "Karir", href: "/careers" },
-    { label: "Blog", href: "/blog" },
-    { label: "Press Kit", href: "/about" },
-  ],
-  Support: [
-    { label: "Pusat Bantuan", href: "/help" },
-    { label: "Dokumentasi API", href: "/help" },
-    { label: "Status Sistem", href: "/help" },
-    { label: "Hubungi Kami", href: "/help" },
-  ],
-  Legal: [
-    { label: "Syarat & Ketentuan", href: "/terms" },
-    { label: "Kebijakan Privasi", href: "/privacy" },
-    { label: "SLA", href: "/terms" },
-  ],
-};
 
 // Animated counter hook
 function useCounter(end: number, duration = 2000, startOnView = true) {
@@ -176,7 +92,7 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => setActiveShowcase((p) => (p + 1) % SHOWCASE.length), 5000);
+    const interval = setInterval(() => setActiveShowcase((p) => (p + 1) % 3), 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -190,13 +106,127 @@ export default function LandingPage() {
     setHeroSlide((p) => (p + dir + HERO_SLIDES.length) % HERO_SLIDES.length);
   }, []);
 
+  // Close lang dropdown on outside click
+  useEffect(() => {
+    if (!langDropdown) return;
+    const close = () => setLangDropdown(false);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [langDropdown]);
+
   const stat1 = useCounter(10000, 2500);
   const stat2 = useCounter(500, 2000);
   const stat3 = useCounter(2500, 2500);
   const stat4 = useCounter(999, 2000);
 
+  // ─── Translated Data Arrays ───
+  const BUSINESS_TYPES = [
+    { nameKey: "biz.coffee.name", emoji: "☕", descKey: "biz.coffee.desc" },
+    { nameKey: "biz.restaurant.name", emoji: "🍽️", descKey: "biz.restaurant.desc" },
+    { nameKey: "biz.retail.name", emoji: "🛍️", descKey: "biz.retail.desc" },
+    { nameKey: "biz.bakery.name", emoji: "🧁", descKey: "biz.bakery.desc" },
+    { nameKey: "biz.barbershop.name", emoji: "💈", descKey: "biz.barbershop.desc" },
+    { nameKey: "biz.pharmacy.name", emoji: "💊", descKey: "biz.pharmacy.desc" },
+    { nameKey: "biz.laundry.name", emoji: "👕", descKey: "biz.laundry.desc" },
+    { nameKey: "biz.franchise.name", emoji: "🏪", descKey: "biz.franchise.desc" },
+  ];
+
+  const FEATURES = [
+    { icon: ShoppingCart, titleKey: "feat.pos.title", descKey: "feat.pos.desc", gradient: "from-emerald-500 to-teal-600" },
+    { icon: Package, titleKey: "feat.inventory.title", descKey: "feat.inventory.desc", gradient: "from-blue-500 to-indigo-600" },
+    { icon: BarChart3, titleKey: "feat.analytics.title", descKey: "feat.analytics.desc", gradient: "from-violet-500 to-purple-600" },
+    { icon: CreditCard, titleKey: "feat.payment.title", descKey: "feat.payment.desc", gradient: "from-amber-500 to-orange-600" },
+    { icon: Truck, titleKey: "feat.delivery.title", descKey: "feat.delivery.desc", gradient: "from-rose-500 to-pink-600" },
+    { icon: Brain, titleKey: "feat.ai.title", descKey: "feat.ai.desc", gradient: "from-cyan-500 to-blue-600" },
+    { icon: Printer, titleKey: "feat.printer.title", descKey: "feat.printer.desc", gradient: "from-sky-500 to-cyan-600" },
+    { icon: Globe, titleKey: "feat.store.title", descKey: "feat.store.desc", gradient: "from-indigo-500 to-violet-600" },
+  ];
+
+  const SHOWCASE = [
+    {
+      titleKey: "showcase.dashboard.title", descKey: "showcase.dashboard.desc",
+      featureKeys: ["showcase.dashboard.f1", "showcase.dashboard.f2", "showcase.dashboard.f3", "showcase.dashboard.f4"],
+      emoji: "📊",
+    },
+    {
+      titleKey: "showcase.pos.title", descKey: "showcase.pos.desc",
+      featureKeys: ["showcase.pos.f1", "showcase.pos.f2", "showcase.pos.f3", "showcase.pos.f4"],
+      emoji: "🛒",
+    },
+    {
+      titleKey: "showcase.multi.title", descKey: "showcase.multi.desc",
+      featureKeys: ["showcase.multi.f1", "showcase.multi.f2", "showcase.multi.f3", "showcase.multi.f4"],
+      emoji: "🏢",
+    },
+  ];
+
+  const TESTIMONIALS = [
+    { name: "Rina Andayani", role: "Owner, Kopi Nusantara", textKey: "testi.1.text", rating: 5, avatar: "RA", gradient: "from-emerald-400 to-teal-500" },
+    { name: "Budi Santoso", role: "Manager, Toko Serba Ada", textKey: "testi.2.text", rating: 5, avatar: "BS", gradient: "from-blue-400 to-indigo-500" },
+    { name: "Maya Putri", role: "Owner, Bakery House", textKey: "testi.3.text", rating: 5, avatar: "MP", gradient: "from-violet-400 to-purple-500" },
+    { name: "Dimas Kurniawan", role: "CEO, Franchise Ayam Goreng", textKey: "testi.4.text", rating: 5, avatar: "DK", gradient: "from-amber-400 to-orange-500" },
+  ];
+
+  const PRICING_FREE_FEATURES = [
+    "pricing.feat.1outlet", "pricing.feat.1user", "pricing.feat.30products",
+    "pricing.feat.basic_pos", "pricing.feat.simple_report", "pricing.feat.1template",
+  ];
+  const PRICING_PRO_FEATURES = [
+    "pricing.feat.5outlet", "pricing.feat.10users", "pricing.feat.unlimited",
+    "pricing.feat.all_pos", "pricing.feat.ai_report", "pricing.feat.premium_template",
+    "pricing.feat.midtrans", "pricing.feat.printer", "pricing.feat.delivery",
+    "pricing.feat.domain", "pricing.feat.support",
+  ];
+
+  const FAQS = [
+    { qKey: "faq.1.q", aKey: "faq.1.a" },
+    { qKey: "faq.2.q", aKey: "faq.2.a" },
+    { qKey: "faq.3.q", aKey: "faq.3.a" },
+    { qKey: "faq.4.q", aKey: "faq.4.a" },
+    { qKey: "faq.5.q", aKey: "faq.5.a" },
+  ];
+
+  const FOOTER_LINKS = [
+    {
+      titleKey: "footer.col.product",
+      links: [
+        { labelKey: "footer.pos", href: "/about" },
+        { labelKey: "footer.stock", href: "/about" },
+        { labelKey: "footer.report", href: "/about" },
+        { labelKey: "footer.online_store", href: "/about" },
+        { labelKey: "footer.delivery", href: "/about" },
+      ],
+    },
+    {
+      titleKey: "footer.col.company",
+      links: [
+        { labelKey: "footer.about", href: "/about" },
+        { labelKey: "footer.careers", href: "/careers" },
+        { labelKey: "footer.blog", href: "/blog" },
+        { labelKey: "footer.press", href: "/about" },
+      ],
+    },
+    {
+      titleKey: "footer.col.support",
+      links: [
+        { labelKey: "footer.help", href: "/help" },
+        { labelKey: "footer.api", href: "/help" },
+        { labelKey: "footer.status", href: "/help" },
+        { labelKey: "footer.contact", href: "/help" },
+      ],
+    },
+    {
+      titleKey: "footer.col.legal",
+      links: [
+        { labelKey: "footer.terms", href: "/terms" },
+        { labelKey: "footer.privacy", href: "/privacy" },
+        { labelKey: "footer.sla", href: "/terms" },
+      ],
+    },
+  ];
+
   return (
-    <div className="landing-page font-sans">
+    <div className="landing-page font-sans" style={{ overflowX: "hidden" }}>
       {/* ═══════ NAVBAR ═══════ */}
       <nav className={`landing-nav ${scrolled ? "landing-nav-scrolled" : ""}`}>
         <div className="landing-container flex items-center justify-between h-16 md:h-20">
@@ -235,14 +265,14 @@ export default function LandingPage() {
               {t("nav.try_free")} <ArrowRight className="w-4 h-4" />
             </Link>
             {/* Language Switcher */}
-            <div className="relative">
+            <div className="relative" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={() => setLangDropdown(!langDropdown)}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition"
               >
                 <Languages className="w-4 h-4" />
                 {lang.toUpperCase()}
-                <ChevronDown className="w-3.5 h-3.5" />
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${langDropdown ? "rotate-180" : ""}`} />
               </button>
               {langDropdown && (
                 <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 min-w-[140px]">
@@ -265,7 +295,7 @@ export default function LandingPage() {
         </div>
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-2xl">
-            <div className="landing-container py-4 space-y-1">
+            <div className="px-4 py-4 space-y-1">
               {[
                 { l: t("nav.features"), h: "#fitur" },
                 { l: t("nav.pricing"), h: "#harga" },
@@ -297,7 +327,6 @@ export default function LandingPage() {
 
       {/* ═══════ HERO CAROUSEL ═══════ */}
       <section className="hero-carousel">
-        {/* Slides */}
         <div className="hero-slides-wrapper">
           {HERO_SLIDES.map((slide, i) => (
             <div
@@ -305,10 +334,10 @@ export default function LandingPage() {
               className={`hero-slide bg-gradient-to-br ${slide.gradient} ${i === heroSlide ? "hero-slide-active" : "hero-slide-hidden"}`}
             >
               <div className="landing-container relative z-10 h-full flex items-center">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full pt-24 md:pt-28 pb-20">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full pt-24 md:pt-28 pb-20">
                   {/* Left: Text Content */}
                   <div className="text-center lg:text-left">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-sm text-white font-semibold mb-8">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-sm text-white font-semibold mb-6 md:mb-8">
                       <Zap className="w-4 h-4" />
                       {t(slide.badgeKey)}
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -318,11 +347,11 @@ export default function LandingPage() {
                       {t(slide.headlineKey)}
                     </h1>
 
-                    <p className="mt-6 text-base md:text-lg text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                    <p className="mt-4 md:mt-6 text-base md:text-lg text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                       {t(slide.subKey)}
                     </p>
 
-                    <div className="flex flex-col sm:flex-row gap-4 mt-10 justify-center lg:justify-start">
+                    <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-8 md:mt-10 justify-center lg:justify-start">
                       <Link href="/signup" className="hero-btn-primary">
                         {t("hero.cta_primary")}
                         <ArrowRight className="w-5 h-5" />
@@ -334,7 +363,7 @@ export default function LandingPage() {
                     </div>
 
                     {/* Trust */}
-                    <div className="flex flex-wrap items-center gap-6 mt-10 justify-center lg:justify-start">
+                    <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-8 md:mt-10 justify-center lg:justify-start">
                       <div className="flex -space-x-3">
                         {["RA", "BS", "MP", "DK", "AS"].map((init, j) => (
                           <div key={j} className="w-9 h-9 rounded-full bg-white/20 border-[3px] border-white/40 flex items-center justify-center text-[10px] text-white font-bold backdrop-blur-sm">{init}</div>
@@ -381,7 +410,7 @@ export default function LandingPage() {
                         {/* Chart */}
                         <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                           <div className="flex items-center justify-between mb-3">
-                            <span className="text-[10px] font-bold text-gray-700">{lang === "id" ? "Penjualan Mingguan" : "Weekly Sales"}</span>
+                            <span className="text-[10px] font-bold text-gray-700">{t("hero.visual.weekly_sales")}</span>
                             <span className="text-[9px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">+12.5%</span>
                           </div>
                           <div className="flex items-end gap-1.5 h-16">
@@ -399,7 +428,7 @@ export default function LandingPage() {
                             <TrendingUp className="w-4 h-4 text-white" />
                           </div>
                           <div>
-                            <p className="text-[9px] text-gray-400">{lang === "id" ? "Omzet Hari Ini" : "Today Revenue"}</p>
+                            <p className="text-[9px] text-gray-400">{t("hero.visual.revenue")}</p>
                             <p className="text-sm font-extrabold text-gray-900">Rp 4.8M</p>
                           </div>
                         </div>
@@ -412,7 +441,7 @@ export default function LandingPage() {
                           <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
                             <ShoppingCart className="w-3.5 h-3.5 text-violet-600" />
                           </div>
-                          <span className="text-[10px] font-bold text-gray-700">{lang === "id" ? "Transaksi" : "Transactions"}</span>
+                          <span className="text-[10px] font-bold text-gray-700">{t("hero.visual.transactions")}</span>
                         </div>
                         <p className="text-xl font-black text-gray-900">127</p>
                       </div>
@@ -456,8 +485,8 @@ export default function LandingPage() {
       {/* ═══════ TRUSTED BY BRANDS ═══════ */}
       <section className="py-10 bg-white border-b border-gray-50">
         <div className="landing-container">
-          <p className="text-center text-xs font-semibold text-gray-300 uppercase tracking-[0.2em] mb-6">Dipercaya oleh brand terkemuka</p>
-          <div className="flex items-center justify-center gap-12 opacity-30 flex-wrap">
+          <p className="text-center text-xs font-semibold text-gray-300 uppercase tracking-[0.2em] mb-6">{t("brands.title")}</p>
+          <div className="flex items-center justify-center gap-6 md:gap-12 opacity-30 flex-wrap">
             {["☕ Kopi Kenangan", "🍽️ Warteg Modern", "🛒 TokoMart", "🧁 BakeryHQ", "💈 BarberKing"].map((brand, i) => (
               <span key={i} className="text-sm font-bold text-gray-600 whitespace-nowrap">{brand}</span>
             ))}
@@ -466,25 +495,25 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ STATS ═══════ */}
-      <section className="py-20 bg-white">
+      <section className="py-16 md:py-20 bg-white">
         <div className="landing-container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {[
-              { ref: stat1.ref, count: stat1.count, suffix: "+", label: "UMKM Terdaftar", icon: Store },
-              { ref: stat2.ref, count: stat2.count, suffix: "+", label: "Kota di Indonesia", icon: MapPin },
-              { ref: stat3.ref, count: stat3.count, suffix: "M+", label: "Transaksi Diproses", icon: CreditCard },
-              { ref: stat4.ref, count: `99.${stat4.count % 10} `, suffix: "%", label: "Uptime Server", icon: Shield },
+              { ref: stat1.ref, count: stat1.count, suffix: "+", labelKey: "stats.registered", icon: Store },
+              { ref: stat2.ref, count: stat2.count, suffix: "+", labelKey: "stats.cities", icon: MapPin },
+              { ref: stat3.ref, count: stat3.count, suffix: "M+", labelKey: "stats.transactions", icon: CreditCard },
+              { ref: stat4.ref, count: `99.${stat4.count % 10} `, suffix: "%", labelKey: "stats.uptime", icon: Shield },
             ].map((s, i) => {
               const Icon = s.icon;
               return (
                 <div key={i} ref={s.ref} className="landing-stat-card group text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#00B894]/10 to-[#00CEC9]/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                    <Icon className="w-7 h-7 text-[#00B894]" />
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-[#00B894]/10 to-[#00CEC9]/10 flex items-center justify-center mx-auto mb-3 md:mb-4 group-hover:scale-110 transition-transform">
+                    <Icon className="w-6 h-6 md:w-7 md:h-7 text-[#00B894]" />
                   </div>
-                  <p className="text-3xl md:text-4xl font-black text-gray-900">
+                  <p className="text-2xl md:text-4xl font-black text-gray-900">
                     {typeof s.count === 'number' ? s.count.toLocaleString() : s.count}{s.suffix}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1 font-medium">{s.label}</p>
+                  <p className="text-xs md:text-sm text-gray-500 mt-1 font-medium">{t(s.labelKey)}</p>
                 </div>
               );
             })}
@@ -493,20 +522,20 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ BUSINESS TYPES ═══════ */}
-      <section id="bisnis" className="py-24 bg-gradient-to-b from-gray-50 to-white">
+      <section id="bisnis" className="py-16 md:py-24 bg-gradient-to-b from-gray-50 to-white">
         <div className="landing-container">
-          <div className="text-center mb-16">
-            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">Untuk Semua Jenis Bisnis</span>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">
-              Solusi Tepat untuk <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">Bisnis Anda</span>
+          <div className="text-center mb-10 md:mb-16">
+            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">{t("biz.section")}</span>
+            <h2 className="text-2xl md:text-4xl font-black text-gray-900">
+              {t("biz.title")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">{t("biz.highlight")}</span>
             </h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
             {BUSINESS_TYPES.map((biz, i) => (
               <div key={i} className="landing-biz-card group">
-                <span className="text-4xl mb-3 block group-hover:scale-125 group-hover:rotate-6 transition-all duration-300">{biz.emoji}</span>
-                <p className="font-bold text-gray-800 group-hover:text-[#00B894] transition-colors">{biz.name}</p>
-                <p className="text-xs text-gray-400 mt-1">{biz.desc}</p>
+                <span className="text-3xl md:text-4xl mb-2 md:mb-3 block group-hover:scale-125 group-hover:rotate-6 transition-all duration-300">{biz.emoji}</span>
+                <p className="font-bold text-sm md:text-base text-gray-800 group-hover:text-[#00B894] transition-colors">{t(biz.nameKey)}</p>
+                <p className="text-[11px] md:text-xs text-gray-400 mt-1">{t(biz.descKey)}</p>
               </div>
             ))}
           </div>
@@ -514,25 +543,25 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ FEATURES ═══════ */}
-      <section id="fitur" className="py-24 bg-white">
+      <section id="fitur" className="py-16 md:py-24 bg-white">
         <div className="landing-container">
-          <div className="text-center mb-16">
-            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">Fitur Lengkap</span>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">
-              Semua yang Bisnis Anda <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">Butuhkan</span>
+          <div className="text-center mb-10 md:mb-16">
+            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">{t("feat.section")}</span>
+            <h2 className="text-2xl md:text-4xl font-black text-gray-900">
+              {t("feat.title")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">{t("feat.highlight")}</span>
             </h2>
-            <p className="mt-4 text-gray-500 max-w-2xl mx-auto">Dari kasir sampai delivery, dari stok sampai laporan keuangan — terintegrasi dalam satu platform cloud</p>
+            <p className="mt-3 md:mt-4 text-sm md:text-base text-gray-500 max-w-2xl mx-auto">{t("feat.sub")}</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {FEATURES.map((feat, i) => {
               const Icon = feat.icon;
               return (
                 <div key={i} className="landing-feature-card group">
-                  <div className={`w - 14 h - 14 rounded - 2xl bg - gradient - to - br ${feat.gradient} flex items - center justify - center mb - 5 group - hover: scale - 110 group - hover: rotate - 3 transition - all shadow - lg`}>
-                    <Icon className="w-7 h-7 text-white" />
+                  <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br ${feat.gradient} flex items-center justify-center mb-4 md:mb-5 group-hover:scale-110 group-hover:rotate-3 transition-all shadow-lg`}>
+                    <Icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
                   </div>
-                  <h3 className="font-bold text-gray-900 text-lg mb-2">{feat.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{feat.desc}</p>
+                  <h3 className="font-bold text-gray-900 text-base md:text-lg mb-2">{t(feat.titleKey)}</h3>
+                  <p className="text-xs md:text-sm text-gray-500 leading-relaxed">{t(feat.descKey)}</p>
                 </div>
               );
             })}
@@ -541,28 +570,28 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ APP SHOWCASE ═══════ */}
-      <section className="py-24 bg-gradient-to-br from-gray-50 via-white to-emerald-50/30">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-gray-50 via-white to-emerald-50/30">
         <div className="landing-container">
-          <div className="text-center mb-16">
-            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">Tampilan Aplikasi</span>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">
-              Didesain untuk <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">Kecepatan</span> & Kemudahan
+          <div className="text-center mb-10 md:mb-16">
+            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">{t("showcase.section")}</span>
+            <h2 className="text-2xl md:text-4xl font-black text-gray-900">
+              {t("showcase.title1")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">{t("showcase.highlight")}</span> {t("showcase.title2")}
             </h2>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="space-y-3 md:space-y-4">
               {SHOWCASE.map((item, i) => (
-                <button key={i} onClick={() => setActiveShowcase(i)} className={`w - full text - left p - 6 rounded - 2xl border - 2 transition - all duration - 300 ${activeShowcase === i ? "border-[#00B894] bg-gradient-to-r from-emerald-50/80 to-teal-50/80 shadow-lg shadow-emerald-100/50" : "border-gray-100 bg-white hover:border-gray-200 hover:shadow-md"} `}>
+                <button key={i} onClick={() => setActiveShowcase(i)} className={`w-full text-left p-4 md:p-6 rounded-2xl border-2 transition-all duration-300 ${activeShowcase === i ? "border-[#00B894] bg-gradient-to-r from-emerald-50/80 to-teal-50/80 shadow-lg shadow-emerald-100/50" : "border-gray-100 bg-white hover:border-gray-200 hover:shadow-md"}`}>
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl">{item.emoji}</span>
-                    <h3 className={`font - bold text - lg ${activeShowcase === i ? "text-emerald-700" : "text-gray-900"} `}>{item.title}</h3>
+                    <span className="text-xl md:text-2xl">{item.emoji}</span>
+                    <h3 className={`font-bold text-base md:text-lg ${activeShowcase === i ? "text-emerald-700" : "text-gray-900"}`}>{t(item.titleKey)}</h3>
                   </div>
                   {activeShowcase === i && (
                     <div className="animate-slide-down">
-                      <p className="text-sm text-gray-500 mb-3 ml-10">{item.desc}</p>
-                      <ul className="grid grid-cols-2 gap-1.5 ml-10">
-                        {item.features.map((f, j) => (
-                          <li key={j} className="flex items-center gap-1.5 text-xs text-gray-600"><Check className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />{f}</li>
+                      <p className="text-xs md:text-sm text-gray-500 mb-3 ml-8 md:ml-10">{t(item.descKey)}</p>
+                      <ul className="grid grid-cols-2 gap-1.5 ml-8 md:ml-10">
+                        {item.featureKeys.map((fKey, j) => (
+                          <li key={j} className="flex items-center gap-1.5 text-[11px] md:text-xs text-gray-600"><Check className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />{t(fKey)}</li>
                         ))}
                       </ul>
                     </div>
@@ -571,14 +600,14 @@ export default function LandingPage() {
               ))}
             </div>
             <div className="relative">
-              <div className="bg-white rounded-3xl shadow-2xl shadow-gray-200/50 border border-gray-200/80 p-8 overflow-hidden">
-                <div className="text-center py-12">
-                  <span className="text-8xl block mb-6 animate-float">{SHOWCASE[activeShowcase].emoji}</span>
-                  <h3 className="text-2xl font-black text-gray-800">{SHOWCASE[activeShowcase].title}</h3>
-                  <p className="text-sm text-gray-400 mt-3 max-w-sm mx-auto leading-relaxed">{SHOWCASE[activeShowcase].desc}</p>
+              <div className="bg-white rounded-3xl shadow-2xl shadow-gray-200/50 border border-gray-200/80 p-6 md:p-8 overflow-hidden">
+                <div className="text-center py-8 md:py-12">
+                  <span className="text-6xl md:text-8xl block mb-4 md:mb-6 animate-float">{SHOWCASE[activeShowcase].emoji}</span>
+                  <h3 className="text-xl md:text-2xl font-black text-gray-800">{t(SHOWCASE[activeShowcase].titleKey)}</h3>
+                  <p className="text-xs md:text-sm text-gray-400 mt-3 max-w-sm mx-auto leading-relaxed">{t(SHOWCASE[activeShowcase].descKey)}</p>
                   <div className="flex justify-center gap-2 mt-6">
                     {SHOWCASE.map((_, i) => (
-                      <div key={i} className={`h - 2 rounded - full transition - all duration - 300 ${activeShowcase === i ? "w-8 bg-gradient-to-r from-[#00B894] to-[#00CEC9]" : "w-2 bg-gray-200"} `} />
+                      <div key={i} className={`h-2 rounded-full transition-all duration-300 ${activeShowcase === i ? "w-8 bg-gradient-to-r from-[#00B894] to-[#00CEC9]" : "w-2 bg-gray-200"}`} />
                     ))}
                   </div>
                 </div>
@@ -591,30 +620,30 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ HOW IT WORKS ═══════ */}
-      <section className="py-24 bg-white">
+      <section className="py-16 md:py-24 bg-white">
         <div className="landing-container">
-          <div className="text-center mb-16">
-            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">Mudah & Cepat</span>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">
-              Mulai dalam <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">3 Langkah</span> Mudah
+          <div className="text-center mb-10 md:mb-16">
+            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">{t("how.section")}</span>
+            <h2 className="text-2xl md:text-4xl font-black text-gray-900">
+              {t("how.title1")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">{t("how.highlight")}</span> {t("how.title2")}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {[
-              { step: "01", title: "Daftar Gratis", desc: "Buat akun dalam 30 detik. Tanpa kartu kredit, tanpa kontrak.", icon: Users, color: "from-emerald-500 to-teal-600" },
-              { step: "02", title: "Setup Bisnis", desc: "Tambah produk, atur harga, pilih template toko online Anda.", icon: Layers, color: "from-blue-500 to-indigo-600" },
-              { step: "03", title: "Mulai Jualan!", desc: "Langsung terima transaksi, monitor analytics, dan kembangkan bisnis.", icon: TrendingUp, color: "from-violet-500 to-purple-600" },
+              { step: "01", titleKey: "how.step1.title", descKey: "how.step1.desc", icon: Users, color: "from-emerald-500 to-teal-600" },
+              { step: "02", titleKey: "how.step2.title", descKey: "how.step2.desc", icon: Layers, color: "from-blue-500 to-indigo-600" },
+              { step: "03", titleKey: "how.step3.title", descKey: "how.step3.desc", icon: TrendingUp, color: "from-violet-500 to-purple-600" },
             ].map((s, i) => {
               const Icon = s.icon;
               return (
                 <div key={i} className="text-center relative">
                   {i < 2 && <div className="hidden md:block absolute top-10 left-[60%] w-[80%] h-[2px] bg-gradient-to-r from-gray-200 to-transparent" />}
-                  <div className={`w - 20 h - 20 rounded - 3xl bg - gradient - to - br ${s.color} flex items - center justify - center mx - auto mb - 5 shadow - xl`}>
-                    <Icon className="w-9 h-9 text-white" />
+                  <div className={`w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-gradient-to-br ${s.color} flex items-center justify-center mx-auto mb-4 md:mb-5 shadow-xl`}>
+                    <Icon className="w-7 h-7 md:w-9 md:h-9 text-white" />
                   </div>
                   <span className="text-xs font-black text-emerald-500 tracking-widest">{s.step}</span>
-                  <h3 className="text-lg font-bold text-gray-900 mt-1">{s.title}</h3>
-                  <p className="text-sm text-gray-500 mt-2">{s.desc}</p>
+                  <h3 className="text-base md:text-lg font-bold text-gray-900 mt-1">{t(s.titleKey)}</h3>
+                  <p className="text-xs md:text-sm text-gray-500 mt-2">{t(s.descKey)}</p>
                 </div>
               );
             })}
@@ -623,83 +652,107 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ PRICING ═══════ */}
-      <section id="harga" className="py-24 bg-gradient-to-b from-gray-50 to-white">
+      <section id="harga" className="py-16 md:py-24 bg-gradient-to-b from-gray-50 to-white">
         <div className="landing-container">
-          <div className="text-center mb-16">
-            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">Harga Transparan</span>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">
-              Pilih Paket yang <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">Sesuai</span>
+          <div className="text-center mb-10 md:mb-16">
+            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">{t("pricing.section")}</span>
+            <h2 className="text-2xl md:text-4xl font-black text-gray-900">
+              {t("pricing.title")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">{t("pricing.highlight")}</span>
             </h2>
-            <p className="mt-3 text-gray-500">Mulai gratis, upgrade kapan saja. Tanpa biaya tersembunyi.</p>
+            <p className="mt-3 text-sm md:text-base text-gray-500">{t("pricing.sub")}</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {PRICING.map((plan) => {
-              const Icon = plan.icon;
-              return (
-                <div key={plan.name} className={`landing - pricing - card ${plan.highlight ? "landing-pricing-highlight" : ""} `}>
-                  {plan.highlight && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-gradient-to-r from-[#00B894] to-[#00CEC9] rounded-full text-xs font-bold text-white shadow-lg shadow-emerald-200/60">
-                      ⭐ Paling Populer
-                    </div>
-                  )}
-                  <div className="flex items-center gap-3 mb-6 mt-2">
-                    <div className={`w - 14 h - 14 rounded - 2xl flex items - center justify - center ${plan.highlight ? "bg-gradient-to-br from-[#00B894] to-[#00CEC9] shadow-lg shadow-emerald-200/50" : "bg-gray-100"} `}>
-                      <Icon className={`w - 7 h - 7 ${plan.highlight ? "text-white" : "text-gray-500"} `} />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-black text-gray-900">{plan.name}</h3>
-                      <p className="text-xs text-gray-400">{plan.desc}</p>
-                    </div>
-                  </div>
-                  <div className="my-6">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-gray-900">{plan.price === 0 ? "Gratis" : `Rp ${(plan.price / 1000).toFixed(0)} rb`}</span>
-                      {plan.price > 0 && <span className="text-gray-400 text-sm">{plan.period}</span>}
-                    </div>
-                    {plan.price === 0 && <p className="text-xs text-gray-400 mt-1">{plan.period}</p>}
-                  </div>
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feat, i) => (
-                      <li key={i} className="flex items-center gap-3 text-sm">
-                        <div className={`w - 5 h - 5 rounded - full flex items - center justify - center flex - shrink - 0 ${plan.highlight ? "bg-emerald-100" : "bg-gray-100"} `}>
-                          <Check className={`w - 3 h - 3 ${plan.highlight ? "text-emerald-600" : "text-gray-400"} `} />
-                        </div>
-                        <span className="text-gray-600">{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/signup" className={`w - full inline - flex items - center justify - center gap - 2 py - 4 rounded - 2xl font - bold transition - all text - base ${plan.highlight ? "bg-gradient-to-r from-[#00B894] to-[#00CEC9] text-white shadow-xl shadow-emerald-200/50 hover:shadow-emerald-300/60 hover:-translate-y-1" : "bg-gray-100 text-gray-700 hover:bg-gray-200"} `}>
-                    {plan.highlight ? "Upgrade ke Pro" : "Mulai Gratis"}
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
+            {/* Free Plan */}
+            <div className="landing-pricing-card">
+              <div className="flex items-center gap-3 mb-6 mt-2">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center bg-gray-100">
+                  <Sparkles className="w-6 h-6 md:w-7 md:h-7 text-gray-500" />
                 </div>
-              );
-            })}
+                <div>
+                  <h3 className="text-xl font-black text-gray-900">Free</h3>
+                  <p className="text-xs text-gray-400">{t("pricing.free.desc")}</p>
+                </div>
+              </div>
+              <div className="my-6">
+                <span className="text-3xl md:text-4xl font-black text-gray-900">{t("pricing.free_label")}</span>
+                <p className="text-xs text-gray-400 mt-1">{t("pricing.forever")}</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {PRICING_FREE_FEATURES.map((feat, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-100">
+                      <Check className="w-3 h-3 text-gray-400" />
+                    </div>
+                    <span className="text-gray-600">{t(feat)}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="w-full inline-flex items-center justify-center gap-2 py-3.5 md:py-4 rounded-2xl font-bold transition-all text-sm md:text-base bg-gray-100 text-gray-700 hover:bg-gray-200">
+                {t("pricing.start_free")}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Pro Plan */}
+            <div className="landing-pricing-card landing-pricing-highlight">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-gradient-to-r from-[#00B894] to-[#00CEC9] rounded-full text-xs font-bold text-white shadow-lg shadow-emerald-200/60 whitespace-nowrap">
+                {t("pricing.most_popular")}
+              </div>
+              <div className="flex items-center gap-3 mb-6 mt-2">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-[#00B894] to-[#00CEC9] shadow-lg shadow-emerald-200/50">
+                  <Crown className="w-6 h-6 md:w-7 md:h-7 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-gray-900">Pro</h3>
+                  <p className="text-xs text-gray-400">{t("pricing.pro.desc")}</p>
+                </div>
+              </div>
+              <div className="my-6">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl md:text-4xl font-black text-gray-900">Rp 99 rb</span>
+                  <span className="text-gray-400 text-sm">{t("pricing.per_month")}</span>
+                </div>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {PRICING_PRO_FEATURES.map((feat, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-100">
+                      <Check className="w-3 h-3 text-emerald-600" />
+                    </div>
+                    <span className="text-gray-600">{t(feat)}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="w-full inline-flex items-center justify-center gap-2 py-3.5 md:py-4 rounded-2xl font-bold transition-all text-sm md:text-base bg-gradient-to-r from-[#00B894] to-[#00CEC9] text-white shadow-xl shadow-emerald-200/50 hover:shadow-emerald-300/60 hover:-translate-y-1">
+                {t("pricing.upgrade_pro")}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ═══════ TESTIMONIALS ═══════ */}
-      <section id="testimoni" className="py-24 bg-white">
+      <section id="testimoni" className="py-16 md:py-24 bg-white">
         <div className="landing-container">
-          <div className="text-center mb-16">
-            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">Testimoni</span>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">
-              Cerita <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">Sukses</span> Pengguna
+          <div className="text-center mb-10 md:mb-16">
+            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">{t("testi.section")}</span>
+            <h2 className="text-2xl md:text-4xl font-black text-gray-900">
+              {t("testi.title")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">{t("testi.highlight")}</span> {t("testi.title2")}
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {TESTIMONIALS.map((t, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {TESTIMONIALS.map((testi, i) => (
               <div key={i} className="landing-testimonial-card group">
                 <div className="flex items-center gap-0.5 mb-4">
-                  {Array.from({ length: t.rating }).map((_, j) => <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
+                  {Array.from({ length: testi.rating }).map((_, j) => <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-6">&ldquo;{t.text}&rdquo;</p>
+                <p className="text-gray-600 text-xs md:text-sm leading-relaxed mb-6">&ldquo;{t(testi.textKey)}&rdquo;</p>
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                  <div className={`w - 11 h - 11 rounded - full bg - gradient - to - br ${t.gradient} flex items - center justify - center text - white text - xs font - bold shadow - md`}>{t.avatar}</div>
+                  <div className={`w-10 h-10 md:w-11 md:h-11 rounded-full bg-gradient-to-br ${testi.gradient} flex items-center justify-center text-white text-xs font-bold shadow-md`}>{testi.avatar}</div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900">{t.name}</p>
-                    <p className="text-xs text-gray-400">{t.role}</p>
+                    <p className="text-sm font-bold text-gray-900">{testi.name}</p>
+                    <p className="text-xs text-gray-400">{testi.role}</p>
                   </div>
                 </div>
               </div>
@@ -709,21 +762,21 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ FAQ ═══════ */}
-      <section className="py-24 bg-gray-50">
-        <div className="landing-container max-w-3xl">
-          <div className="text-center mb-14">
-            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">FAQ</span>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Pertanyaan Umum</h2>
+      <section className="py-16 md:py-24 bg-gray-50">
+        <div className="landing-container" style={{ maxWidth: "48rem" }}>
+          <div className="text-center mb-10 md:mb-14">
+            <span className="inline-block text-xs font-bold text-emerald-600 uppercase tracking-[0.2em] bg-emerald-50 px-4 py-1.5 rounded-full mb-4">{t("faq.section")}</span>
+            <h2 className="text-2xl md:text-4xl font-black text-gray-900">{t("faq.title")}</h2>
           </div>
           <div className="space-y-3">
             {FAQS.map((faq, i) => (
               <div key={i} className="landing-faq-card">
-                <button onClick={() => setActiveFaq(activeFaq === i ? null : i)} className="w-full flex items-center justify-between p-5 text-left">
-                  <span className="font-bold text-gray-800 pr-4">{faq.q}</span>
-                  <ChevronDown className={`w - 5 h - 5 text - gray - 400 flex - shrink - 0 transition - transform ${activeFaq === i ? "rotate-180" : ""} `} />
+                <button onClick={() => setActiveFaq(activeFaq === i ? null : i)} className="w-full flex items-center justify-between p-4 md:p-5 text-left">
+                  <span className="font-bold text-sm md:text-base text-gray-800 pr-4">{t(faq.qKey)}</span>
+                  <ChevronDown className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${activeFaq === i ? "rotate-180" : ""}`} />
                 </button>
                 {activeFaq === i && (
-                  <div className="px-5 pb-5 animate-slide-down"><p className="text-sm text-gray-500 leading-relaxed">{faq.a}</p></div>
+                  <div className="px-4 md:px-5 pb-4 md:pb-5 animate-slide-down"><p className="text-xs md:text-sm text-gray-500 leading-relaxed">{t(faq.aKey)}</p></div>
                 )}
               </div>
             ))}
@@ -732,33 +785,33 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ CTA ═══════ */}
-      <section className="py-24 relative overflow-hidden">
+      <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="landing-cta-bg" />
         <div className="landing-container relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur text-white text-sm font-semibold mb-8">
-            <Zap className="w-4 h-4" /> Gratis selamanya untuk UMKM
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur text-white text-sm font-semibold mb-6 md:mb-8">
+            <Zap className="w-4 h-4" /> {t("cta.badge")}
           </div>
-          <h2 className="text-3xl md:text-5xl font-black text-white leading-tight max-w-3xl mx-auto">
-            Kelola Bisnis Anda dengan <span className="text-yellow-300">CODAPOS</span> Sekarang!
+          <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-white leading-tight max-w-3xl mx-auto">
+            {t("cta.title1")} <span className="text-yellow-300">CODAPOS</span> {t("cta.title2")}
           </h2>
-          <p className="mt-5 text-white/70 text-lg max-w-xl mx-auto">
-            Daftar gratis dalam 30 detik. Tanpa kartu kredit, tanpa kontrak, tanpa risiko.
+          <p className="mt-4 md:mt-5 text-white/70 text-sm md:text-lg max-w-xl mx-auto">
+            {t("cta.sub")}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
-            <Link href="/signup" className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-white text-emerald-700 font-black rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-lg">
-              Daftar Gratis Sekarang <ArrowRight className="w-5 h-5" />
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center mt-8 md:mt-10">
+            <Link href="/signup" className="inline-flex items-center justify-center gap-2 px-8 md:px-10 py-4 md:py-5 bg-white text-emerald-700 font-black rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-base md:text-lg">
+              {t("cta.btn1")} <ArrowRight className="w-5 h-5" />
             </Link>
-            <a href="#harga" className="inline-flex items-center justify-center gap-2 px-10 py-5 border-2 border-white/30 text-white font-bold rounded-2xl hover:bg-white/10 transition-all text-lg">
-              Lihat Harga
+            <a href="#harga" className="inline-flex items-center justify-center gap-2 px-8 md:px-10 py-4 md:py-5 border-2 border-white/30 text-white font-bold rounded-2xl hover:bg-white/10 transition-all text-base md:text-lg">
+              {t("cta.btn2")}
             </a>
           </div>
         </div>
       </section>
 
       {/* ═══════ FOOTER ═══════ */}
-      <footer className="bg-gray-900 pt-20 pb-8">
+      <footer className="bg-gray-900 pt-16 md:pt-20 pb-8">
         <div className="landing-container">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-10 mb-12 md:mb-16">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2.5 mb-5">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#00B894] to-[#00CEC9] flex items-center justify-center shadow-lg">
@@ -766,7 +819,7 @@ export default function LandingPage() {
                 </div>
                 <span className="text-lg font-black text-white">CODAPOS</span>
               </div>
-              <p className="text-sm text-gray-400 leading-relaxed mb-5">Platform POS & manajemen bisnis cloud #1 untuk UMKM Indonesia.</p>
+              <p className="text-sm text-gray-400 leading-relaxed mb-5">{t("footer.desc")}</p>
               <div className="flex gap-3">
                 {[Mail, Phone, MapPin].map((Icon, i) => (
                   <a key={i} href={["/help", "/help", "/about"][i]} className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#00B894] transition-all">
@@ -775,24 +828,24 @@ export default function LandingPage() {
                 ))}
               </div>
             </div>
-            {Object.entries(FOOTER_LINKS).map(([title, links]) => (
-              <div key={title}>
-                <h4 className="text-sm font-bold text-white mb-5">{title}</h4>
-                <ul className="space-y-3">
-                  {links.map((link) => (
-                    <li key={link.label}>
-                      <Link href={link.href} className="text-sm text-gray-400 hover:text-white transition-colors">{link.label}</Link>
+            {FOOTER_LINKS.map((group) => (
+              <div key={t(group.titleKey)}>
+                <h4 className="text-sm font-bold text-white mb-4 md:mb-5">{t(group.titleKey)}</h4>
+                <ul className="space-y-2 md:space-y-3">
+                  {group.links.map((link) => (
+                    <li key={t(link.labelKey)}>
+                      <Link href={link.href} className="text-xs md:text-sm text-gray-400 hover:text-white transition-colors">{t(link.labelKey)}</Link>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-gray-500">&copy; 2025 CODAPOS. All rights reserved.</p>
-            <div className="flex items-center gap-6">
-              <Link href="/privacy" className="text-xs text-gray-500 hover:text-gray-300 transition">Privacy Policy</Link>
-              <Link href="/terms" className="text-xs text-gray-500 hover:text-gray-300 transition">Terms of Service</Link>
+          <div className="border-t border-gray-800 pt-6 md:pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-xs md:text-sm text-gray-500">&copy; 2025 CODAPOS. {t("footer.rights")}</p>
+            <div className="flex items-center gap-4 md:gap-6">
+              <Link href="/privacy" className="text-xs text-gray-500 hover:text-gray-300 transition">{t("footer.privacy")}</Link>
+              <Link href="/terms" className="text-xs text-gray-500 hover:text-gray-300 transition">{t("footer.terms")}</Link>
               <div className="flex items-center gap-1">
                 <Shield className="w-3.5 h-3.5 text-emerald-400" />
                 <span className="text-xs text-emerald-400 font-bold">SSL Secured</span>

@@ -40,12 +40,12 @@ export default function TransactionsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between animate-fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Transaksi</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-white">Transaksi</h1>
                     <p className="text-sm text-white/40 mt-1">Riwayat semua transaksi ({transactions.length})</p>
                 </div>
-                <button className="btn-secondary flex items-center gap-2">
+                <button className="btn-secondary flex items-center gap-2 self-start sm:self-auto">
                     <Download className="w-4 h-4" /> Export
                 </button>
             </div>
@@ -74,47 +74,49 @@ export default function TransactionsPage() {
                 </div>
             ) : (
                 <div className="glass p-0 overflow-hidden animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                    <table className="table-glass">
-                        <thead>
-                            <tr>
-                                <th>No. Transaksi</th>
-                                <th>Tanggal</th>
-                                <th>Outlet</th>
-                                <th>Kasir</th>
-                                <th>Item</th>
-                                <th>Total</th>
-                                <th>Metode</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredTransactions.map((tx) => (
-                                <tr key={tx.id}>
-                                    <td className="font-mono text-white/70 text-sm">{tx.transaction_number}</td>
-                                    <td className="text-white/50 text-sm">{formatDate(tx.created_at)}</td>
-                                    <td className="text-white">{tx.outlet?.name || "—"}</td>
-                                    <td className="text-white/50">{tx.cashier?.full_name || "—"}</td>
-                                    <td className="text-white/50">{tx.items?.length || 0}</td>
-                                    <td className="font-semibold text-white">{formatCurrency(tx.total_amount)}</td>
-                                    <td>
-                                        <span className="badge badge-info">
-                                            {tx.payments?.[0]?.payment_method || "—"}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className={`badge ${tx.status === "completed" ? "badge-success" :
+                    <div className="overflow-x-auto">
+                        <table className="table-glass">
+                            <thead>
+                                <tr>
+                                    <th>No. Transaksi</th>
+                                    <th>Tanggal</th>
+                                    <th className="mobile-hide">Outlet</th>
+                                    <th className="mobile-hide">Kasir</th>
+                                    <th className="mobile-hide">Item</th>
+                                    <th>Total</th>
+                                    <th className="mobile-hide">Metode</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredTransactions.map((tx) => (
+                                    <tr key={tx.id}>
+                                        <td className="font-mono text-white/70 text-xs sm:text-sm">{tx.transaction_number}</td>
+                                        <td className="text-white/50 text-xs sm:text-sm">{formatDate(tx.created_at)}</td>
+                                        <td className="text-white mobile-hide">{tx.outlet?.name || "—"}</td>
+                                        <td className="text-white/50 mobile-hide">{tx.cashier?.full_name || "—"}</td>
+                                        <td className="text-white/50 mobile-hide">{tx.items?.length || 0}</td>
+                                        <td className="font-semibold text-white">{formatCurrency(tx.total_amount)}</td>
+                                        <td className="mobile-hide">
+                                            <span className="badge badge-info">
+                                                {tx.payments?.[0]?.payment_method || "—"}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span className={`badge ${tx.status === "completed" ? "badge-success" :
                                                 tx.status === "refunded" ? "badge-danger" :
                                                     "badge-warning"
-                                            }`}>
-                                            {tx.status === "completed" ? "Selesai" :
-                                                tx.status === "refunded" ? "Refund" :
-                                                    tx.status === "voided" ? "Batal" : "Pending"}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                                }`}>
+                                                {tx.status === "completed" ? "Selesai" :
+                                                    tx.status === "refunded" ? "Refund" :
+                                                        tx.status === "voided" ? "Batal" : "Pending"}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>
