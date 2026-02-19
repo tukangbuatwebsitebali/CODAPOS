@@ -555,14 +555,14 @@ body {
   right: 0;
   z-index: 50;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .landing-nav-scrolled {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 1px 20px rgba(0, 0, 0, 0.06);
+  background: #ffffff;
+  box-shadow: 0 1px 20px rgba(0, 0, 0, 0.08);
+  border-bottom-color: transparent;
 }
 
 /* ── Buttons ── */
@@ -607,13 +607,158 @@ body {
   background: #f0fdf8;
 }
 
-/* ── Hero ── */
-.landing-hero {
+/* ── Hero Carousel ── */
+.hero-carousel {
   position: relative;
   overflow: hidden;
   min-height: 100vh;
+  z-index: 1;
 }
 
+.hero-slides-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 600px;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+  pointer-events: none;
+}
+
+.hero-slide-active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.hero-slide-hidden {
+  opacity: 0;
+  z-index: 1;
+}
+
+/* Hero Visual Card */
+.hero-visual-card {
+  position: relative;
+  padding: 30px;
+}
+
+/* Hero Buttons */
+.hero-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 32px;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #0052D4;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.hero-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  background: #f8fafc;
+}
+
+.hero-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 32px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.hero-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Navigation Arrows */
+.hero-nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.hero-nav-arrow:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.hero-nav-left {
+  left: 20px;
+}
+
+.hero-nav-right {
+  right: 20px;
+}
+
+/* Dot Indicators */
+.hero-dots {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+}
+
+.hero-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.hero-dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.hero-dot-active {
+  background: white;
+  border-color: white;
+  transform: scale(1.2);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+/* Keep old hero classes for backward compat */
 .landing-hero-bg {
   position: absolute;
   inset: 0;
@@ -830,7 +975,29 @@ body {
     padding: 0 16px;
   }
 
-  .landing-hero {
+  .hero-carousel {
     min-height: auto;
+  }
+
+  .hero-slides-wrapper {
+    height: auto;
+    min-height: 550px;
+  }
+
+  .hero-nav-arrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hero-nav-left {
+    left: 8px;
+  }
+
+  .hero-nav-right {
+    right: 8px;
+  }
+
+  .hero-dots {
+    bottom: 16px;
   }
 }

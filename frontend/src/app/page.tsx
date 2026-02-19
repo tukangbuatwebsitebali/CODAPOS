@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   ShoppingCart, BarChart3, Users, Package, CreditCard, Truck,
@@ -8,26 +8,40 @@ import {
   Globe, Shield, Clock, Printer, Brain, Palette, Mail, Phone,
   MapPin, Sparkles, Crown, Play, ChevronRight, Headphones,
   Award, TrendingUp, Layers, Monitor, Smartphone, Wifi,
+  ChevronLeft, Languages,
 } from "lucide-react";
+import { useLanguageStore, useT, type Lang } from "@/lib/i18n";
 
 // ═══════════════════════════════════════════════════════════════
 //  CODAPOS Landing Page — Premium Professional Design
 // ═══════════════════════════════════════════════════════════════
 
-// Default content (overridden by CMS via GlobalConfig)
-const DEFAULT_HERO = {
-  badge: "Platform POS #1 untuk UMKM Indonesia",
-  headline: "Solusi Kasir Digital & Manajemen Bisnis Terdepan",
-  subheadline: "Kelola kasir, inventori, laporan keuangan, dan toko online dalam satu platform terintegrasi. Gratis untuk UMKM, powerful untuk enterprise.",
-  cta_primary: "Mulai Gratis Sekarang",
-  cta_secondary: "Lihat Demo",
-};
-
-const DEFAULT_STATS = [
-  { value: "10,000+", label: "UMKM Terdaftar", suffix: "" },
-  { value: "500+", label: "Kota di Indonesia", suffix: "" },
-  { value: "2.5", label: "Miliar Transaksi Diproses", suffix: "M+" },
-  { value: "99.9", label: "Uptime Server", suffix: "%" },
+// Hero slide illustrations (CSS-based visuals)
+const HERO_SLIDES = [
+  {
+    badgeKey: "hero.slide1.badge",
+    headlineKey: "hero.slide1.headline",
+    subKey: "hero.slide1.sub",
+    visual: "📊",
+    visualLabel: "Dashboard Analytics",
+    gradient: "from-[#0052D4] via-[#4364F7] to-[#6FB1FC]",
+  },
+  {
+    badgeKey: "hero.slide2.badge",
+    headlineKey: "hero.slide2.headline",
+    subKey: "hero.slide2.sub",
+    visual: "🛒",
+    visualLabel: "POS System",
+    gradient: "from-[#0066FF] via-[#0099FF] to-[#00CCFF]",
+  },
+  {
+    badgeKey: "hero.slide3.badge",
+    headlineKey: "hero.slide3.headline",
+    subKey: "hero.slide3.sub",
+    visual: "🏢",
+    visualLabel: "Multi-Outlet",
+    gradient: "from-[#0052D4] via-[#0088CC] to-[#00B4D8]",
+  },
 ];
 
 const BUSINESS_TYPES = [
@@ -148,6 +162,12 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [activeShowcase, setActiveShowcase] = useState(0);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [heroSlide, setHeroSlide] = useState(0);
+  const [langDropdown, setLangDropdown] = useState(false);
+  const t = useT();
+  const { lang, setLang, loadFromStorage } = useLanguageStore();
+
+  useEffect(() => { loadFromStorage(); }, [loadFromStorage]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -158,6 +178,16 @@ export default function LandingPage() {
   useEffect(() => {
     const interval = setInterval(() => setActiveShowcase((p) => (p + 1) % SHOWCASE.length), 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Hero auto-slide
+  useEffect(() => {
+    const interval = setInterval(() => setHeroSlide((p) => (p + 1) % HERO_SLIDES.length), 6000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const goSlide = useCallback((dir: number) => {
+    setHeroSlide((p) => (p + dir + HERO_SLIDES.length) % HERO_SLIDES.length);
   }, []);
 
   const stat1 = useCounter(10000, 2500);
@@ -185,7 +215,12 @@ export default function LandingPage() {
             </div>
           </Link>
           <div className="hidden md:flex items-center gap-8">
-            {[{ l: "Fitur", h: "#fitur" }, { l: "Harga", h: "#harga" }, { l: "Bisnis", h: "#bisnis" }, { l: "Testimoni", h: "#testimoni" }].map(n => (
+            {[
+              { l: t("nav.features"), h: "#fitur" },
+              { l: t("nav.pricing"), h: "#harga" },
+              { l: t("nav.business"), h: "#bisnis" },
+              { l: t("nav.testimonials"), h: "#testimoni" },
+            ].map(n => (
               <a key={n.h} href={n.h} className="text-sm font-medium text-gray-500 hover:text-[#00B894] transition-colors relative group">
                 {n.l}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00B894] to-[#00CEC9] group-hover:w-full transition-all duration-300" />
@@ -193,8 +228,36 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/login" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition px-5 py-2.5 rounded-xl hover:bg-gray-50">Masuk</Link>
-            <Link href="/signup" className="landing-btn-primary text-sm">Coba Gratis <ArrowRight className="w-4 h-4" /></Link>
+            <Link href="/login" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition px-5 py-2.5 rounded-xl hover:bg-gray-50">
+              {t("nav.login")}
+            </Link>
+            <Link href="/signup" className="landing-btn-primary text-sm">
+              {t("nav.try_free")} <ArrowRight className="w-4 h-4" />
+            </Link>
+            {/* Language Switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setLangDropdown(!langDropdown)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition"
+              >
+                <Languages className="w-4 h-4" />
+                {lang.toUpperCase()}
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+              {langDropdown && (
+                <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 min-w-[140px]">
+                  {([["id", "🇮🇩 Indonesia"], ["en", "🇬🇧 English"]] as const).map(([code, label]) => (
+                    <button
+                      key={code}
+                      onClick={() => { setLang(code as Lang); setLangDropdown(false); }}
+                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition ${lang === code ? "font-bold text-[#00B894]" : "text-gray-600"}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-xl hover:bg-gray-100 transition z-10">
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -203,170 +266,190 @@ export default function LandingPage() {
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-2xl">
             <div className="landing-container py-4 space-y-1">
-              {[{ l: "Fitur", h: "#fitur" }, { l: "Harga", h: "#harga" }, { l: "Bisnis", h: "#bisnis" }, { l: "Testimoni", h: "#testimoni" }].map(n => (
+              {[
+                { l: t("nav.features"), h: "#fitur" },
+                { l: t("nav.pricing"), h: "#harga" },
+                { l: t("nav.business"), h: "#bisnis" },
+                { l: t("nav.testimonials"), h: "#testimoni" },
+              ].map(n => (
                 <a key={n.h} href={n.h} onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl">{n.l}</a>
               ))}
               <div className="pt-3 border-t border-gray-100 space-y-2">
-                <Link href="/login" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl">Masuk</Link>
-                <Link href="/signup" className="block px-4 py-3 text-center bg-gradient-to-r from-[#00B894] to-[#00CEC9] text-white rounded-xl font-bold">Coba Gratis</Link>
+                <Link href="/login" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl">{t("nav.login")}</Link>
+                <Link href="/signup" className="block px-4 py-3 text-center bg-gradient-to-r from-[#00B894] to-[#00CEC9] text-white rounded-xl font-bold">{t("nav.try_free")}</Link>
+                <div className="flex items-center gap-2 px-4 py-2">
+                  <Languages className="w-4 h-4 text-gray-400" />
+                  {([["id", "ID"], ["en", "EN"]] as const).map(([code, label]) => (
+                    <button
+                      key={code}
+                      onClick={() => setLang(code as Lang)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${lang === code ? "bg-[#00B894] text-white" : "bg-gray-100 text-gray-600"}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         )}
       </nav>
 
-      {/* ═══════ HERO ═══════ */}
-      <section className="landing-hero">
-        <div className="landing-hero-bg" />
-        {/* Floating geometric shapes */}
-        <div className="absolute top-20 left-[10%] w-72 h-72 bg-[#00B894]/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-[10%] w-96 h-96 bg-[#00CEC9]/8 rounded-full blur-3xl animate-float-delay" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[#00B894]/5 to-[#00CEC9]/5 rounded-full blur-3xl" />
-
-        <div className="landing-container relative z-10 pt-32 md:pt-44 pb-24 md:pb-32">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-200/50 text-sm text-emerald-700 font-semibold mb-8 shadow-sm hover:shadow-md transition-shadow">
-                <Zap className="w-4 h-4 text-emerald-500" />
-                {DEFAULT_HERO.badge}
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-
-              <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-black text-gray-900 leading-[1.1] tracking-tight">
-                {DEFAULT_HERO.headline.split("&").map((part, i) => (
-                  <span key={i}>
-                    {i > 0 && <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00957a]">&amp; </span>}
-                    {part}
-                  </span>
-                ))}
-              </h1>
-
-              <p className="mt-6 text-lg text-gray-500 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                {DEFAULT_HERO.subheadline}
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 mt-10 justify-center lg:justify-start">
-                <Link href="/signup" className="landing-btn-primary text-base px-8 py-4 shadow-xl shadow-emerald-200/50 hover:shadow-emerald-300/60">
-                  {DEFAULT_HERO.cta_primary}
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-                <a href="#fitur" className="landing-btn-secondary text-base px-8 py-4">
-                  <Play className="w-5 h-5" />
-                  {DEFAULT_HERO.cta_secondary}
-                </a>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="flex flex-wrap items-center gap-6 mt-10 justify-center lg:justify-start">
-                <div className="flex -space-x-3">
-                  {["RA", "BS", "MP", "DK", "AS"].map((init, i) => (
-                    <div key={i} className="w-9 h-9 rounded-full bg-gradient-to-br from-[#00B894] to-[#00CEC9] border-[3px] border-white flex items-center justify-center text-[10px] text-white font-bold shadow-sm">{init}</div>
-                  ))}
-                </div>
-                <div className="text-left">
-                  <div className="flex items-center gap-0.5">
-                    {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
-                    <span className="text-sm font-bold text-gray-700 ml-1">4.9/5</span>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-0.5">Dipercaya 10,000+ pelaku usaha</p>
-                </div>
-              </div>
-
-              {/* Trust Badges */}
-              <div className="flex items-center gap-4 mt-6 justify-center lg:justify-start text-xs text-gray-400">
-                <span className="flex items-center gap-1"><Shield className="w-3.5 h-3.5 text-emerald-500" /> SSL Secured</span>
-                <span className="flex items-center gap-1"><Wifi className="w-3.5 h-3.5 text-emerald-500" /> 99.9% Uptime</span>
-                <span className="flex items-center gap-1"><Headphones className="w-3.5 h-3.5 text-emerald-500" /> Support 24/7</span>
-              </div>
-            </div>
-
-            {/* Hero Visual — Premium Dashboard Mockup */}
-            <div className="relative hidden lg:block">
-              <div className="landing-hero-visual">
-                {/* Floating revenue card */}
-                <div className="absolute -top-8 -left-8 w-56 bg-white rounded-2xl shadow-2xl shadow-gray-200/60 p-5 border border-gray-100 z-20 animate-float">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-200/50">
-                      <TrendingUp className="w-5 h-5 text-white" />
+      {/* ═══════ HERO CAROUSEL ═══════ */}
+      <section className="hero-carousel">
+        {/* Slides */}
+        <div className="hero-slides-wrapper">
+          {HERO_SLIDES.map((slide, i) => (
+            <div
+              key={i}
+              className={`hero-slide bg-gradient-to-br ${slide.gradient} ${i === heroSlide ? "hero-slide-active" : "hero-slide-hidden"}`}
+            >
+              <div className="landing-container relative z-10 h-full flex items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full pt-24 md:pt-28 pb-20">
+                  {/* Left: Text Content */}
+                  <div className="text-center lg:text-left">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-sm text-white font-semibold mb-8">
+                      <Zap className="w-4 h-4" />
+                      {t(slide.badgeKey)}
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </div>
-                    <div>
-                      <p className="text-[10px] text-gray-400 font-medium">Omzet Hari Ini</p>
-                      <p className="text-base font-extrabold text-gray-900">Rp 4.850.000</p>
-                    </div>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full w-[78%] bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full" />
-                  </div>
-                  <p className="text-[10px] text-emerald-600 font-semibold mt-1.5 flex items-center gap-1"><TrendingUp className="w-3 h-3" /> +23% vs kemarin</p>
-                </div>
 
-                {/* Floating orders card */}
-                <div className="absolute -bottom-6 -right-6 w-52 bg-white rounded-2xl shadow-2xl shadow-gray-200/60 p-4 border border-gray-100 z-20 animate-float-delay">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center">
-                      <ShoppingCart className="w-4 h-4 text-violet-600" />
-                    </div>
-                    <span className="text-xs font-bold text-gray-700">Transaksi Baru</span>
-                  </div>
-                  <p className="text-2xl font-black text-gray-900">127</p>
-                  <p className="text-[10px] text-gray-400">order hari ini</p>
-                </div>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-[1.15] tracking-tight">
+                      {t(slide.headlineKey)}
+                    </h1>
 
-                {/* Main Dashboard */}
-                <div className="bg-white rounded-3xl shadow-2xl shadow-gray-300/30 border border-gray-200/80 p-6 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00B894] via-[#00CEC9] to-[#00B894]" />
-                  {/* Browser dots */}
-                  <div className="flex items-center gap-2 mb-5">
-                    <div className="w-3 h-3 rounded-full bg-red-400" />
-                    <div className="w-3 h-3 rounded-full bg-amber-400" />
-                    <div className="w-3 h-3 rounded-full bg-green-400" />
-                    <div className="flex-1 mx-4 h-7 bg-gray-50 rounded-lg border border-gray-100 flex items-center px-3">
-                      <span className="text-[9px] text-gray-400">app.codapos.com/dashboard</span>
+                    <p className="mt-6 text-base md:text-lg text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                      {t(slide.subKey)}
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-4 mt-10 justify-center lg:justify-start">
+                      <Link href="/signup" className="hero-btn-primary">
+                        {t("hero.cta_primary")}
+                        <ArrowRight className="w-5 h-5" />
+                      </Link>
+                      <a href="#fitur" className="hero-btn-secondary">
+                        <Play className="w-5 h-5" />
+                        {t("hero.cta_secondary")}
+                      </a>
                     </div>
-                  </div>
-                  {/* Metric cards */}
-                  <div className="grid grid-cols-3 gap-3 mb-5">
-                    {[{ label: "Revenue", val: "Rp 12.5M", color: "emerald" }, { label: "Orders", val: "847 trx", color: "blue" }, { label: "Success", val: "98.2%", color: "violet" }].map((m, i) => (
-                      <div key={i} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                        <p className="text-[9px] text-gray-400 font-medium">{m.label}</p>
-                        <p className="text-sm font-extrabold text-gray-800 mt-0.5">{m.val}</p>
+
+                    {/* Trust */}
+                    <div className="flex flex-wrap items-center gap-6 mt-10 justify-center lg:justify-start">
+                      <div className="flex -space-x-3">
+                        {["RA", "BS", "MP", "DK", "AS"].map((init, j) => (
+                          <div key={j} className="w-9 h-9 rounded-full bg-white/20 border-[3px] border-white/40 flex items-center justify-center text-[10px] text-white font-bold backdrop-blur-sm">{init}</div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                  {/* Chart */}
-                  <div className="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[10px] font-bold text-gray-700">Penjualan Mingguan</span>
-                      <span className="text-[9px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">+12.5%</span>
-                    </div>
-                    <div className="flex items-end gap-2 h-16">
-                      {[35, 55, 42, 75, 48, 85, 62, 90, 55, 95, 70, 88].map((h, i) => (
-                        <div key={i} className="flex-1 rounded-t-sm transition-all duration-500" style={{ height: `${h}%`, background: `linear-gradient(to top, #00B894, #00CEC9)`, opacity: 0.6 + i * 0.03 }} />
-                      ))}
-                    </div>
-                  </div>
-                  {/* Product list */}
-                  <div className="space-y-2">
-                    {["Nasi Goreng Special", "Es Kopi Susu", "Mie Ayam Bakso"].map((p, i) => (
-                      <div key={i} className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl border border-gray-100">
-                        <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${["from-orange-100 to-amber-200", "from-blue-100 to-cyan-200", "from-purple-100 to-pink-200"][i]}`} />
-                        <div className="flex-1">
-                          <p className="text-[10px] font-semibold text-gray-700">{p}</p>
-                          <p className="text-[9px] text-gray-400">{["32 sold", "28 sold", "24 sold"][i]}</p>
+                      <div className="text-left">
+                        <div className="flex items-center gap-0.5">
+                          {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
+                          <span className="text-sm font-bold text-white ml-1">4.9/5</span>
                         </div>
-                        <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{["Rp 25K", "Rp 18K", "Rp 22K"][i]}</span>
+                        <p className="text-xs text-white/60 mt-0.5">{t("hero.trust")}</p>
                       </div>
-                    ))}
+                    </div>
+                  </div>
+
+                  {/* Right: Visual Dashboard Mockup */}
+                  <div className="hidden lg:block relative">
+                    <div className="hero-visual-card animate-float">
+                      {/* Main Dashboard Card */}
+                      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/20">
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00B894] via-[#00CEC9] to-[#0099FF] rounded-t-3xl" />
+                        {/* Browser dots */}
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-3 h-3 rounded-full bg-red-400" />
+                          <div className="w-3 h-3 rounded-full bg-amber-400" />
+                          <div className="w-3 h-3 rounded-full bg-green-400" />
+                          <div className="flex-1 mx-3 h-6 bg-gray-50 rounded-lg flex items-center px-3">
+                            <span className="text-[9px] text-gray-400">app.codapos.com/dashboard</span>
+                          </div>
+                        </div>
+                        {/* Metrics */}
+                        <div className="grid grid-cols-3 gap-3 mb-4">
+                          {[
+                            { label: "Revenue", val: "Rp 12.5M", icon: "📈" },
+                            { label: "Orders", val: "847 trx", icon: "🛒" },
+                            { label: "Success", val: "98.2%", icon: "✅" },
+                          ].map((m, j) => (
+                            <div key={j} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                              <p className="text-[9px] text-gray-400 font-medium">{m.icon} {m.label}</p>
+                              <p className="text-sm font-extrabold text-gray-800 mt-0.5">{m.val}</p>
+                            </div>
+                          ))}
+                        </div>
+                        {/* Chart */}
+                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-[10px] font-bold text-gray-700">{lang === "id" ? "Penjualan Mingguan" : "Weekly Sales"}</span>
+                            <span className="text-[9px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">+12.5%</span>
+                          </div>
+                          <div className="flex items-end gap-1.5 h-16">
+                            {[35, 55, 42, 75, 48, 85, 62, 90, 55, 95, 70, 88].map((h, j) => (
+                              <div key={j} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, background: "linear-gradient(to top, #0066FF, #00CCFF)", opacity: 0.6 + j * 0.03 }} />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Floating Revenue Card */}
+                      <div className="absolute -top-4 -left-6 w-52 bg-white rounded-2xl shadow-2xl p-4 border border-gray-100 z-10 animate-float-delay">
+                        <div className="flex items-center gap-2.5 mb-2">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
+                            <TrendingUp className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-[9px] text-gray-400">{lang === "id" ? "Omzet Hari Ini" : "Today Revenue"}</p>
+                            <p className="text-sm font-extrabold text-gray-900">Rp 4.8M</p>
+                          </div>
+                        </div>
+                        <p className="text-[9px] text-emerald-600 font-semibold flex items-center gap-1"><TrendingUp className="w-3 h-3" /> +23%</p>
+                      </div>
+
+                      {/* Floating Orders Card */}
+                      <div className="absolute -bottom-4 -right-4 w-44 bg-white rounded-2xl shadow-2xl p-3.5 border border-gray-100 z-10 animate-float">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
+                            <ShoppingCart className="w-3.5 h-3.5 text-violet-600" />
+                          </div>
+                          <span className="text-[10px] font-bold text-gray-700">{lang === "id" ? "Transaksi" : "Transactions"}</span>
+                        </div>
+                        <p className="text-xl font-black text-gray-900">127</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
 
-        {/* Wave */}
-        <div className="landing-wave">
-          <svg viewBox="0 0 1440 100" fill="none"><path d="M0,80L60,70C120,60,240,40,360,35C480,30,600,40,720,55C840,70,960,90,1080,88C1200,86,1320,62,1380,50L1440,38V100H0Z" fill="white" /></svg>
+        {/* Navigation Arrows */}
+        <button
+          onClick={() => goSlide(-1)}
+          className="hero-nav-arrow hero-nav-left"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button
+          onClick={() => goSlide(1)}
+          className="hero-nav-arrow hero-nav-right"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+
+        {/* Dot Indicators */}
+        <div className="hero-dots">
+          {HERO_SLIDES.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setHeroSlide(i)}
+              className={`hero-dot ${i === heroSlide ? "hero-dot-active" : ""}`}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
         </div>
       </section>
 
@@ -390,7 +473,7 @@ export default function LandingPage() {
               { ref: stat1.ref, count: stat1.count, suffix: "+", label: "UMKM Terdaftar", icon: Store },
               { ref: stat2.ref, count: stat2.count, suffix: "+", label: "Kota di Indonesia", icon: MapPin },
               { ref: stat3.ref, count: stat3.count, suffix: "M+", label: "Transaksi Diproses", icon: CreditCard },
-              { ref: stat4.ref, count: `99.${stat4.count % 10}`, suffix: "%", label: "Uptime Server", icon: Shield },
+              { ref: stat4.ref, count: `99.${stat4.count % 10} `, suffix: "%", label: "Uptime Server", icon: Shield },
             ].map((s, i) => {
               const Icon = s.icon;
               return (
@@ -445,7 +528,7 @@ export default function LandingPage() {
               const Icon = feat.icon;
               return (
                 <div key={i} className="landing-feature-card group">
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feat.gradient} flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-all shadow-lg`}>
+                  <div className={`w - 14 h - 14 rounded - 2xl bg - gradient - to - br ${feat.gradient} flex items - center justify - center mb - 5 group - hover: scale - 110 group - hover: rotate - 3 transition - all shadow - lg`}>
                     <Icon className="w-7 h-7 text-white" />
                   </div>
                   <h3 className="font-bold text-gray-900 text-lg mb-2">{feat.title}</h3>
@@ -469,10 +552,10 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-4">
               {SHOWCASE.map((item, i) => (
-                <button key={i} onClick={() => setActiveShowcase(i)} className={`w-full text-left p-6 rounded-2xl border-2 transition-all duration-300 ${activeShowcase === i ? "border-[#00B894] bg-gradient-to-r from-emerald-50/80 to-teal-50/80 shadow-lg shadow-emerald-100/50" : "border-gray-100 bg-white hover:border-gray-200 hover:shadow-md"}`}>
+                <button key={i} onClick={() => setActiveShowcase(i)} className={`w - full text - left p - 6 rounded - 2xl border - 2 transition - all duration - 300 ${activeShowcase === i ? "border-[#00B894] bg-gradient-to-r from-emerald-50/80 to-teal-50/80 shadow-lg shadow-emerald-100/50" : "border-gray-100 bg-white hover:border-gray-200 hover:shadow-md"} `}>
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-2xl">{item.emoji}</span>
-                    <h3 className={`font-bold text-lg ${activeShowcase === i ? "text-emerald-700" : "text-gray-900"}`}>{item.title}</h3>
+                    <h3 className={`font - bold text - lg ${activeShowcase === i ? "text-emerald-700" : "text-gray-900"} `}>{item.title}</h3>
                   </div>
                   {activeShowcase === i && (
                     <div className="animate-slide-down">
@@ -495,7 +578,7 @@ export default function LandingPage() {
                   <p className="text-sm text-gray-400 mt-3 max-w-sm mx-auto leading-relaxed">{SHOWCASE[activeShowcase].desc}</p>
                   <div className="flex justify-center gap-2 mt-6">
                     {SHOWCASE.map((_, i) => (
-                      <div key={i} className={`h-2 rounded-full transition-all duration-300 ${activeShowcase === i ? "w-8 bg-gradient-to-r from-[#00B894] to-[#00CEC9]" : "w-2 bg-gray-200"}`} />
+                      <div key={i} className={`h - 2 rounded - full transition - all duration - 300 ${activeShowcase === i ? "w-8 bg-gradient-to-r from-[#00B894] to-[#00CEC9]" : "w-2 bg-gray-200"} `} />
                     ))}
                   </div>
                 </div>
@@ -526,7 +609,7 @@ export default function LandingPage() {
               return (
                 <div key={i} className="text-center relative">
                   {i < 2 && <div className="hidden md:block absolute top-10 left-[60%] w-[80%] h-[2px] bg-gradient-to-r from-gray-200 to-transparent" />}
-                  <div className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${s.color} flex items-center justify-center mx-auto mb-5 shadow-xl`}>
+                  <div className={`w - 20 h - 20 rounded - 3xl bg - gradient - to - br ${s.color} flex items - center justify - center mx - auto mb - 5 shadow - xl`}>
                     <Icon className="w-9 h-9 text-white" />
                   </div>
                   <span className="text-xs font-black text-emerald-500 tracking-widest">{s.step}</span>
@@ -553,15 +636,15 @@ export default function LandingPage() {
             {PRICING.map((plan) => {
               const Icon = plan.icon;
               return (
-                <div key={plan.name} className={`landing-pricing-card ${plan.highlight ? "landing-pricing-highlight" : ""}`}>
+                <div key={plan.name} className={`landing - pricing - card ${plan.highlight ? "landing-pricing-highlight" : ""} `}>
                   {plan.highlight && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-gradient-to-r from-[#00B894] to-[#00CEC9] rounded-full text-xs font-bold text-white shadow-lg shadow-emerald-200/60">
                       ⭐ Paling Populer
                     </div>
                   )}
                   <div className="flex items-center gap-3 mb-6 mt-2">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${plan.highlight ? "bg-gradient-to-br from-[#00B894] to-[#00CEC9] shadow-lg shadow-emerald-200/50" : "bg-gray-100"}`}>
-                      <Icon className={`w-7 h-7 ${plan.highlight ? "text-white" : "text-gray-500"}`} />
+                    <div className={`w - 14 h - 14 rounded - 2xl flex items - center justify - center ${plan.highlight ? "bg-gradient-to-br from-[#00B894] to-[#00CEC9] shadow-lg shadow-emerald-200/50" : "bg-gray-100"} `}>
+                      <Icon className={`w - 7 h - 7 ${plan.highlight ? "text-white" : "text-gray-500"} `} />
                     </div>
                     <div>
                       <h3 className="text-xl font-black text-gray-900">{plan.name}</h3>
@@ -570,7 +653,7 @@ export default function LandingPage() {
                   </div>
                   <div className="my-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-gray-900">{plan.price === 0 ? "Gratis" : `Rp ${(plan.price / 1000).toFixed(0)}rb`}</span>
+                      <span className="text-4xl font-black text-gray-900">{plan.price === 0 ? "Gratis" : `Rp ${(plan.price / 1000).toFixed(0)} rb`}</span>
                       {plan.price > 0 && <span className="text-gray-400 text-sm">{plan.period}</span>}
                     </div>
                     {plan.price === 0 && <p className="text-xs text-gray-400 mt-1">{plan.period}</p>}
@@ -578,14 +661,14 @@ export default function LandingPage() {
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feat, i) => (
                       <li key={i} className="flex items-center gap-3 text-sm">
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${plan.highlight ? "bg-emerald-100" : "bg-gray-100"}`}>
-                          <Check className={`w-3 h-3 ${plan.highlight ? "text-emerald-600" : "text-gray-400"}`} />
+                        <div className={`w - 5 h - 5 rounded - full flex items - center justify - center flex - shrink - 0 ${plan.highlight ? "bg-emerald-100" : "bg-gray-100"} `}>
+                          <Check className={`w - 3 h - 3 ${plan.highlight ? "text-emerald-600" : "text-gray-400"} `} />
                         </div>
                         <span className="text-gray-600">{feat}</span>
                       </li>
                     ))}
                   </ul>
-                  <Link href="/signup" className={`w-full inline-flex items-center justify-center gap-2 py-4 rounded-2xl font-bold transition-all text-base ${plan.highlight ? "bg-gradient-to-r from-[#00B894] to-[#00CEC9] text-white shadow-xl shadow-emerald-200/50 hover:shadow-emerald-300/60 hover:-translate-y-1" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
+                  <Link href="/signup" className={`w - full inline - flex items - center justify - center gap - 2 py - 4 rounded - 2xl font - bold transition - all text - base ${plan.highlight ? "bg-gradient-to-r from-[#00B894] to-[#00CEC9] text-white shadow-xl shadow-emerald-200/50 hover:shadow-emerald-300/60 hover:-translate-y-1" : "bg-gray-100 text-gray-700 hover:bg-gray-200"} `}>
                     {plan.highlight ? "Upgrade ke Pro" : "Mulai Gratis"}
                     <ArrowRight className="w-4 h-4" />
                   </Link>
@@ -613,7 +696,7 @@ export default function LandingPage() {
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed mb-6">&ldquo;{t.text}&rdquo;</p>
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                  <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white text-xs font-bold shadow-md`}>{t.avatar}</div>
+                  <div className={`w - 11 h - 11 rounded - full bg - gradient - to - br ${t.gradient} flex items - center justify - center text - white text - xs font - bold shadow - md`}>{t.avatar}</div>
                   <div>
                     <p className="text-sm font-bold text-gray-900">{t.name}</p>
                     <p className="text-xs text-gray-400">{t.role}</p>
@@ -637,7 +720,7 @@ export default function LandingPage() {
               <div key={i} className="landing-faq-card">
                 <button onClick={() => setActiveFaq(activeFaq === i ? null : i)} className="w-full flex items-center justify-between p-5 text-left">
                   <span className="font-bold text-gray-800 pr-4">{faq.q}</span>
-                  <ChevronDown className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${activeFaq === i ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`w - 5 h - 5 text - gray - 400 flex - shrink - 0 transition - transform ${activeFaq === i ? "rotate-180" : ""} `} />
                 </button>
                 {activeFaq === i && (
                   <div className="px-5 pb-5 animate-slide-down"><p className="text-sm text-gray-500 leading-relaxed">{faq.a}</p></div>
