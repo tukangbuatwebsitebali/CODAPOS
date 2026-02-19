@@ -294,16 +294,16 @@ export default function ProductsPage() {
     // ==================== RENDER ====================
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between animate-fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Produk & Kategori</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-white">Produk & Kategori</h1>
                     <p className="text-sm text-white/40 mt-1">
                         Kelola katalog produk dan kategori Anda
                     </p>
                 </div>
                 <button
                     onClick={tab === "products" ? openCreateModal : openCreateCatModal}
-                    className="btn-primary flex items-center gap-2"
+                    className="btn-primary flex items-center gap-2 self-start sm:self-auto"
                 >
                     <Plus className="w-4 h-4" />
                     {tab === "products" ? "Tambah Produk" : "Tambah Kategori"}
@@ -394,79 +394,81 @@ export default function ProductsPage() {
                     ) : viewMode === "list" ? (
                         /* Product Table */
                         <div className="glass p-0 overflow-hidden animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                            <table className="table-glass">
-                                <thead>
-                                    <tr>
-                                        <th>Produk</th>
-                                        <th>SKU</th>
-                                        <th>Kategori</th>
-                                        <th>Harga</th>
-                                        <th>Biaya</th>
-                                        <th className="text-right">Stok</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {products.map((product) => {
-                                        const status = getStatusBadge(product);
-                                        return (
-                                            <tr key={product.id}>
-                                                <td>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden">
-                                                            {product.image_url ? (
-                                                                <img src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8080'}${product.image_url}`} alt={product.name} className="w-full h-full object-cover" />
-                                                            ) : (
-                                                                <Package className="w-5 h-5 text-white/20" />
-                                                            )}
+                            <div className="overflow-x-auto">
+                                <table className="table-glass">
+                                    <thead>
+                                        <tr>
+                                            <th>Produk</th>
+                                            <th className="mobile-hide">SKU</th>
+                                            <th className="mobile-hide">Kategori</th>
+                                            <th>Harga</th>
+                                            <th className="mobile-hide">Biaya</th>
+                                            <th className="text-right mobile-hide">Stok</th>
+                                            <th>Status</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {products.map((product) => {
+                                            const status = getStatusBadge(product);
+                                            return (
+                                                <tr key={product.id}>
+                                                    <td>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                                                {product.image_url ? (
+                                                                    <img src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8080'}${product.image_url}`} alt={product.name} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <Package className="w-5 h-5 text-white/20" />
+                                                                )}
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <span className="font-medium text-white text-sm">{product.name}</span>
+                                                                {product.description && (
+                                                                    <p className="text-xs text-white/30 truncate max-w-[150px] sm:max-w-[200px]">{product.description}</p>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <span className="font-medium text-white">{product.name}</span>
-                                                            {product.description && (
-                                                                <p className="text-xs text-white/30 truncate max-w-[200px]">{product.description}</p>
-                                                            )}
+                                                    </td>
+                                                    <td className="font-mono text-white/50 text-sm mobile-hide">{product.sku || "—"}</td>
+                                                    <td className="mobile-hide">
+                                                        {product.category ? (
+                                                            <span className="badge badge-info">{product.category.name}</span>
+                                                        ) : (
+                                                            <span className="text-white/20 text-sm">—</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="font-medium text-white text-sm">{formatCurrency(product.base_price)}</td>
+                                                    <td className="text-white/40 mobile-hide">{formatCurrency(product.cost_price)}</td>
+                                                    <td className="text-right mobile-hide">
+                                                        {product.track_stock ? (
+                                                            <span className={`text-sm font-bold ${(stockMap[product.id] ?? 0) <= 0 ? "text-red-400" : "text-white"}`}>
+                                                                {(stockMap[product.id] ?? 0).toLocaleString("id-ID")}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-white/20 text-xs">—</span>
+                                                        )}
+                                                    </td>
+                                                    <td><span className={`badge ${status.class}`}>{status.label}</span></td>
+                                                    <td>
+                                                        <div className="flex gap-1">
+                                                            <button onClick={() => openEditModal(product)} className="btn-ghost p-2">
+                                                                <Edit3 className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setDeleteConfirm(product.id)}
+                                                                className="btn-ghost p-2 hover:text-red-400"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td className="font-mono text-white/50 text-sm">{product.sku || "—"}</td>
-                                                <td>
-                                                    {product.category ? (
-                                                        <span className="badge badge-info">{product.category.name}</span>
-                                                    ) : (
-                                                        <span className="text-white/20 text-sm">—</span>
-                                                    )}
-                                                </td>
-                                                <td className="font-medium text-white">{formatCurrency(product.base_price)}</td>
-                                                <td className="text-white/40">{formatCurrency(product.cost_price)}</td>
-                                                <td className="text-right">
-                                                    {product.track_stock ? (
-                                                        <span className={`text-sm font-bold ${(stockMap[product.id] ?? 0) <= 0 ? "text-red-400" : "text-white"}`}>
-                                                            {(stockMap[product.id] ?? 0).toLocaleString("id-ID")}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-white/20 text-xs">—</span>
-                                                    )}
-                                                </td>
-                                                <td><span className={`badge ${status.class}`}>{status.label}</span></td>
-                                                <td>
-                                                    <div className="flex gap-1">
-                                                        <button onClick={() => openEditModal(product)} className="btn-ghost p-2">
-                                                            <Edit3 className="w-4 h-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setDeleteConfirm(product.id)}
-                                                            className="btn-ghost p-2 hover:text-red-400"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     ) : (
                         /* Grid View */
@@ -635,7 +637,7 @@ export default function ProductsPage() {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">SKU</label>
                                     <input type="text" className="input-glass" placeholder="NGS-001" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
@@ -661,7 +663,7 @@ export default function ProductsPage() {
                                 <textarea className="input-glass" rows={2} placeholder="Deskripsi singkat produk" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
                             </div>
 
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Harga Jual *</label>
                                     <input type="number" className="input-glass" placeholder="25000" value={form.base_price || ""} onChange={(e) => setForm({ ...form, base_price: Number(e.target.value) })} required min={0} />

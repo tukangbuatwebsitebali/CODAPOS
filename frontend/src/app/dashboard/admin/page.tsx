@@ -252,24 +252,24 @@ export default function AdminPage() {
                     <Shield className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Super Admin</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-white">Super Admin</h1>
                     <p className="text-sm text-white/50">Kelola merchant, tipe usaha, fitur, dan konfigurasi global</p>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 overflow-x-auto pb-2">
                 {tabs.map(tab => (
                     <button
                         key={tab.key}
                         onClick={() => { setActiveTab(tab.key); setSelectedMerchant(null); }}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === tab.key
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab.key
                             ? 'bg-[#1DA1F2] text-white shadow-lg shadow-blue-900/30'
                             : 'glass-card text-white/70 hover:text-white'
                             }`}
                     >
                         {tab.icon}
-                        {tab.label}
+                        <span className="hidden sm:inline">{tab.label}</span>
                     </button>
                 ))}
             </div>
@@ -303,81 +303,83 @@ export default function AdminPage() {
 
                             {/* Merchant List */}
                             <div className="glass-card overflow-hidden">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="border-b border-white/10">
-                                            <th className="text-left p-4 text-sm font-medium text-white/60">Merchant</th>
-                                            <th className="text-left p-4 text-sm font-medium text-white/60">Tipe</th>
-                                            <th className="text-left p-4 text-sm font-medium text-white/60">Plan</th>
-                                            <th className="text-left p-4 text-sm font-medium text-white/60">Revenue %</th>
-                                            <th className="text-left p-4 text-sm font-medium text-white/60">Status</th>
-                                            <th className="text-left p-4 text-sm font-medium text-white/60">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {merchants.map(m => (
-                                            <tr key={m.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                                <td className="p-4">
-                                                    <div>
-                                                        <p className="font-medium text-white">{m.name}</p>
-                                                        <p className="text-xs text-white/40">{m.subdomain}.codapos.com</p>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4 text-sm text-white/70">
-                                                    {m.merchant_type ? `${m.merchant_type.icon || ''} ${m.merchant_type.name}` : '-'}
-                                                </td>
-                                                <td className="p-4">
-                                                    <span className={`px-2 py-1 rounded-lg text-xs font-medium ${m.subscription_plan === 'pro'
-                                                        ? 'bg-[#1DA1F2]/20 text-[#1DA1F2]'
-                                                        : 'bg-white/10 text-white/60'
-                                                        }`}>
-                                                        {m.subscription_plan}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4 text-sm text-white/70">
-                                                    <div className="flex items-center gap-1">
-                                                        <Percent className="w-3 h-3" />
-                                                        {m.revenue_share_pct}%
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <button onClick={() => handleToggle(m.id, m.is_enabled)} className="transition-colors">
-                                                        {m.is_enabled ? (
-                                                            <ToggleRight className="w-6 h-6 text-green-400" />
-                                                        ) : (
-                                                            <ToggleLeft className="w-6 h-6 text-red-400" />
-                                                        )}
-                                                    </button>
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() => openEditModal(m)}
-                                                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#1DA1F2]/10 text-[#1DA1F2] hover:bg-[#1DA1F2]/20 text-xs font-medium transition-all"
-                                                            title="Edit Merchant"
-                                                        >
-                                                            <Edit3 className="w-3 h-3" /> Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setConfirmDelete(m)}
-                                                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-medium transition-all"
-                                                            title="Hapus Merchant"
-                                                        >
-                                                            <Trash2 className="w-3 h-3" /> Hapus
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleLoadFeatures(m.id)}
-                                                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/5 text-white/50 hover:bg-white/10 text-xs font-medium transition-all"
-                                                            title="Kelola Fitur"
-                                                        >
-                                                            <Zap className="w-3 h-3" /> Fitur <ChevronRight className="w-3 h-3" />
-                                                        </button>
-                                                    </div>
-                                                </td>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="border-b border-white/10">
+                                                <th className="text-left p-4 text-sm font-medium text-white/60">Merchant</th>
+                                                <th className="text-left p-4 text-sm font-medium text-white/60 mobile-hide">Tipe</th>
+                                                <th className="text-left p-4 text-sm font-medium text-white/60">Plan</th>
+                                                <th className="text-left p-4 text-sm font-medium text-white/60 mobile-hide">Revenue %</th>
+                                                <th className="text-left p-4 text-sm font-medium text-white/60">Status</th>
+                                                <th className="text-left p-4 text-sm font-medium text-white/60">Aksi</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {merchants.map(m => (
+                                                <tr key={m.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                                    <td className="p-4">
+                                                        <div>
+                                                            <p className="font-medium text-white">{m.name}</p>
+                                                            <p className="text-xs text-white/40">{m.subdomain}.codapos.com</p>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-sm text-white/70 mobile-hide">
+                                                        {m.merchant_type ? `${m.merchant_type.icon || ''} ${m.merchant_type.name}` : '-'}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${m.subscription_plan === 'pro'
+                                                            ? 'bg-[#1DA1F2]/20 text-[#1DA1F2]'
+                                                            : 'bg-white/10 text-white/60'
+                                                            }`}>
+                                                            {m.subscription_plan}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4 text-sm text-white/70 mobile-hide">
+                                                        <div className="flex items-center gap-1">
+                                                            <Percent className="w-3 h-3" />
+                                                            {m.revenue_share_pct}%
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <button onClick={() => handleToggle(m.id, m.is_enabled)} className="transition-colors">
+                                                            {m.is_enabled ? (
+                                                                <ToggleRight className="w-6 h-6 text-green-400" />
+                                                            ) : (
+                                                                <ToggleLeft className="w-6 h-6 text-red-400" />
+                                                            )}
+                                                        </button>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => openEditModal(m)}
+                                                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#1DA1F2]/10 text-[#1DA1F2] hover:bg-[#1DA1F2]/20 text-xs font-medium transition-all"
+                                                                title="Edit Merchant"
+                                                            >
+                                                                <Edit3 className="w-3 h-3" /> Edit
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setConfirmDelete(m)}
+                                                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-medium transition-all"
+                                                                title="Hapus Merchant"
+                                                            >
+                                                                <Trash2 className="w-3 h-3" /> Hapus
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleLoadFeatures(m.id)}
+                                                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/5 text-white/50 hover:bg-white/10 text-xs font-medium transition-all"
+                                                                title="Kelola Fitur"
+                                                            >
+                                                                <Zap className="w-3 h-3" /> Fitur <ChevronRight className="w-3 h-3" />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                                 {merchants.length === 0 && (
                                     <div className="p-8 text-center text-white/40">Belum ada merchant terdaftar</div>
                                 )}
@@ -451,7 +453,7 @@ export default function AdminPage() {
                                             </div>
 
                                             {/* Slug & Subdomain */}
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
                                                     <label className="text-xs text-white/50 mb-1.5 block">Slug</label>
                                                     <input
@@ -473,7 +475,7 @@ export default function AdminPage() {
                                             </div>
 
                                             {/* Plan & Type */}
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
                                                     <label className="text-xs text-white/50 mb-1.5 block">Subscription Plan</label>
                                                     <select
@@ -504,7 +506,7 @@ export default function AdminPage() {
                                             </div>
 
                                             {/* Open/Close Time & Revenue */}
-                                            <div className="grid grid-cols-3 gap-3">
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                                 <div>
                                                     <label className="text-xs text-white/50 mb-1.5 block">Buka</label>
                                                     <input

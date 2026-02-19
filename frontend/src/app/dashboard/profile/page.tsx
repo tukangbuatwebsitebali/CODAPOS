@@ -211,7 +211,7 @@ export default function ProfilePage() {
         <div className="space-y-6 max-w-4xl mx-auto">
             {/* Toast Notification */}
             {toast && (
-                <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl animate-slide-in-up ${toast.type === "success"
+                <div className={`fixed top-4 right-4 left-4 sm:left-auto z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl animate-slide-in-up ${toast.type === "success"
                     ? "bg-green-500/20 border border-green-500/30 text-green-400"
                     : "bg-red-500/20 border border-red-500/30 text-red-400"
                     }`}>
@@ -222,7 +222,7 @@ export default function ProfilePage() {
 
             {/* Page Header */}
             <div className="animate-fade-in">
-                <h1 className="text-2xl font-bold text-white">Profil Saya</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-white">Profil Saya</h1>
                 <p className="text-sm text-white/40 mt-1">Kelola informasi akun, merchant, dan keamanan Anda</p>
             </div>
 

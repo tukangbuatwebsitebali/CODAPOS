@@ -98,19 +98,19 @@ export default function CustomersPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-900/20">
                         <Users className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Pelanggan</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold text-white">Pelanggan</h1>
                         <p className="text-sm text-white/50">{customers.length} pelanggan terdaftar</p>
                     </div>
                 </div>
                 <button
                     onClick={() => { setShowForm(!showForm); setSelectedCustomer(null); }}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1DA1F2] hover:bg-[#1DA1F2]/80 text-white text-sm font-medium rounded-xl transition-colors shadow-lg shadow-blue-900/30"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1DA1F2] hover:bg-[#1DA1F2]/80 text-white text-sm font-medium rounded-xl transition-colors shadow-lg shadow-blue-900/30 self-start sm:self-auto"
                 >
                     {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                     {showForm ? 'Batal' : 'Tambah'}
@@ -185,7 +185,7 @@ export default function CustomersPage() {
                         {showAddressForm && (
                             <form onSubmit={handleAddAddress} className="bg-white/5 rounded-xl p-4 space-y-3">
                                 <MapPicker latitude={addressForm.latitude} longitude={addressForm.longitude} onChange={(lat, lng) => setAddressForm({ ...addressForm, latitude: lat, longitude: lng })} height="200px" />
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <input placeholder="Label (Rumah, Kantor...)" value={addressForm.label} onChange={e => setAddressForm({ ...addressForm, label: e.target.value })} className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none" />
                                     <input placeholder="Kota" value={addressForm.city} onChange={e => setAddressForm({ ...addressForm, city: e.target.value })} className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none" />
                                 </div>
@@ -230,44 +230,46 @@ export default function CustomersPage() {
                 <div className="glass-card p-12 text-center text-white/50">Memuat data...</div>
             ) : (
                 <div className="glass-card overflow-hidden">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="border-b border-white/10">
-                                <th className="text-left p-4 text-sm font-medium text-white/60">Nama</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/60">Telepon</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/60">Email</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/60">Status</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/60">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filtered.map(customer => (
-                                <tr key={customer.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                    <td className="p-4 text-white font-medium">{customer.name}</td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-1.5 text-sm text-white/70">
-                                            <Phone className="w-3 h-3" />{customer.phone}
-                                        </div>
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-1.5 text-sm text-white/70">
-                                            {customer.email ? <><Mail className="w-3 h-3" />{customer.email}</> : <span className="text-white/30">-</span>}
-                                        </div>
-                                    </td>
-                                    <td className="p-4">
-                                        <span className={`px-2 py-1 rounded-lg text-xs ${customer.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                            {customer.is_active ? 'Aktif' : 'Nonaktif'}
-                                        </span>
-                                    </td>
-                                    <td className="p-4">
-                                        <button onClick={() => handleSelectCustomer(customer)} className="text-[#1DA1F2] hover:text-[#1DA1F2]/80 transition-colors" title="Lihat Detail">
-                                            <Eye className="w-4 h-4" />
-                                        </button>
-                                    </td>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-white/10">
+                                    <th className="text-left p-4 text-sm font-medium text-white/60">Nama</th>
+                                    <th className="text-left p-4 text-sm font-medium text-white/60">Telepon</th>
+                                    <th className="text-left p-4 text-sm font-medium text-white/60 mobile-hide">Email</th>
+                                    <th className="text-left p-4 text-sm font-medium text-white/60">Status</th>
+                                    <th className="text-left p-4 text-sm font-medium text-white/60">Aksi</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {filtered.map(customer => (
+                                    <tr key={customer.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                        <td className="p-4 text-white font-medium">{customer.name}</td>
+                                        <td className="p-4">
+                                            <div className="flex items-center gap-1.5 text-sm text-white/70">
+                                                <Phone className="w-3 h-3" />{customer.phone}
+                                            </div>
+                                        </td>
+                                        <td className="p-4 mobile-hide">
+                                            <div className="flex items-center gap-1.5 text-sm text-white/70">
+                                                {customer.email ? <><Mail className="w-3 h-3" />{customer.email}</> : <span className="text-white/30">-</span>}
+                                            </div>
+                                        </td>
+                                        <td className="p-4">
+                                            <span className={`px-2 py-1 rounded-lg text-xs ${customer.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                                {customer.is_active ? 'Aktif' : 'Nonaktif'}
+                                            </span>
+                                        </td>
+                                        <td className="p-4">
+                                            <button onClick={() => handleSelectCustomer(customer)} className="text-[#1DA1F2] hover:text-[#1DA1F2]/80 transition-colors" title="Lihat Detail">
+                                                <Eye className="w-4 h-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                     {filtered.length === 0 && (
                         <div className="p-8 text-center text-white/40">
                             {search ? 'Tidak ditemukan' : 'Belum ada pelanggan'}

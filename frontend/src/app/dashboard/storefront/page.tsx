@@ -468,7 +468,7 @@ export default function StorefrontSettingsPage() {
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                    <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C40000] to-[#FF4444] flex items-center justify-center">
                             <Palette className="w-5 h-5 text-white" />
                         </div>

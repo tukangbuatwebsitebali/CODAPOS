@@ -38,7 +38,7 @@ export default function JournalsPage() {
     return (
         <div className="space-y-6">
             <div className="animate-fade-in">
-                <h1 className="text-2xl font-bold text-white">Jurnal Umum</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-white">Jurnal Umum</h1>
                 <p className="text-sm text-white/40 mt-1">Catatan transaksi akuntansi double-entry</p>
             </div>
 

@@ -93,12 +93,12 @@ export default function OutletsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between animate-fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Outlet</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-white">Outlet</h1>
                     <p className="text-sm text-white/40 mt-1">Kelola outlet dan cabang bisnis Anda ({outlets.length} outlet)</p>
                 </div>
-                <button onClick={() => { resetForm(); setShowModal(true); }} className="btn-primary flex items-center gap-2">
+                <button onClick={() => { resetForm(); setShowModal(true); }} className="btn-primary flex items-center gap-2 self-start sm:self-auto">
                     <Plus className="w-4 h-4" />
                     Tambah Outlet
                 </button>
@@ -203,7 +203,7 @@ export default function OutletsPage() {
                         </div>
 
                         <form onSubmit={handleSave} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Nama Outlet *</label>
                                     <input type="text" className="input-glass" placeholder="Outlet Denpasar" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
@@ -219,7 +219,7 @@ export default function OutletsPage() {
                                 <textarea className="input-glass" rows={2} placeholder="Jl. Sunset Road No. 12" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Kota</label>
                                     <input type="text" className="input-glass" placeholder="Denpasar" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
@@ -230,7 +230,7 @@ export default function OutletsPage() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Tipe</label>
                                     <select className="input-glass" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as Outlet["type"] })}>

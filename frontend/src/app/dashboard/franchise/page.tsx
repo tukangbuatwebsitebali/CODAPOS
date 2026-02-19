@@ -8,7 +8,7 @@ export default function FranchisePage() {
     return (
         <div className="space-y-6">
             <div className="animate-fade-in">
-                <h1 className="text-2xl font-bold text-white">Franchise Management</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-white">Franchise Management</h1>
                 <p className="text-sm text-white/40 mt-1">Kelola royalti dan mitra franchise</p>
             </div>
 

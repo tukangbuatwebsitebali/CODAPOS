@@ -74,19 +74,19 @@ export default function TeamPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-400 flex items-center justify-center shadow-lg shadow-purple-900/20">
                         <Users className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Kelola Tim</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold text-white">Kelola Tim</h1>
                         <p className="text-sm text-white/50">{members.length} anggota tim</p>
                     </div>
                 </div>
                 <button
                     onClick={() => setShowInvite(!showInvite)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1DA1F2] hover:bg-[#1DA1F2]/80 text-white text-sm font-medium rounded-xl transition-colors shadow-lg shadow-blue-900/30"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1DA1F2] hover:bg-[#1DA1F2]/80 text-white text-sm font-medium rounded-xl transition-colors shadow-lg shadow-blue-900/30 self-start sm:self-auto"
                 >
                     {showInvite ? <X className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
                     {showInvite ? 'Batal' : 'Undang'}
@@ -155,87 +155,89 @@ export default function TeamPage() {
                 <div className="glass-card p-12 text-center text-white/50">Memuat data...</div>
             ) : (
                 <div className="glass-card overflow-hidden">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="border-b border-white/10">
-                                <th className="text-left p-4 text-sm font-medium text-white/60">Anggota</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/60">Email</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/60">Role</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/60">Status</th>
-                                <th className="text-left p-4 text-sm font-medium text-white/60">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {members.map(member => {
-                                const roleInfo = ROLE_LABELS[member.role] || ROLE_LABELS.cashier;
-                                return (
-                                    <tr key={member.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1DA1F2] to-[#A7D8FF] flex items-center justify-center text-white text-sm font-bold">
-                                                    {member.full_name.charAt(0).toUpperCase()}
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-white/10">
+                                    <th className="text-left p-4 text-sm font-medium text-white/60">Anggota</th>
+                                    <th className="text-left p-4 text-sm font-medium text-white/60 mobile-hide">Email</th>
+                                    <th className="text-left p-4 text-sm font-medium text-white/60">Role</th>
+                                    <th className="text-left p-4 text-sm font-medium text-white/60">Status</th>
+                                    <th className="text-left p-4 text-sm font-medium text-white/60">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {members.map(member => {
+                                    const roleInfo = ROLE_LABELS[member.role] || ROLE_LABELS.cashier;
+                                    return (
+                                        <tr key={member.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                            <td className="p-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1DA1F2] to-[#A7D8FF] flex items-center justify-center text-white text-sm font-bold">
+                                                        {member.full_name.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-white font-medium text-sm">{member.full_name}</p>
+                                                        {member.phone && (
+                                                            <p className="text-xs text-white/40">{member.phone}</p>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-white font-medium text-sm">{member.full_name}</p>
-                                                    {member.phone && (
-                                                        <p className="text-xs text-white/40">{member.phone}</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-sm text-white/70">{member.email}</td>
-                                        <td className="p-4">
-                                            {editingRole === member.id && member.role !== 'owner' ? (
-                                                <select
-                                                    value={member.role}
-                                                    onChange={e => handleRoleChange(member.id, e.target.value)}
-                                                    onBlur={() => setEditingRole(null)}
-                                                    autoFocus
-                                                    className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white text-xs focus:outline-none"
-                                                >
-                                                    <option value="admin" className="bg-[#1a1a2e]">Admin</option>
-                                                    <option value="finance" className="bg-[#1a1a2e]">Finance</option>
-                                                    <option value="outlet_manager" className="bg-[#1a1a2e]">Manager</option>
-                                                    <option value="cashier" className="bg-[#1a1a2e]">Kasir</option>
-                                                </select>
-                                            ) : (
-                                                <button
-                                                    onClick={() => member.role !== 'owner' && setEditingRole(member.id)}
-                                                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${roleInfo.color} ${member.role !== 'owner' ? 'cursor-pointer hover:opacity-80' : 'cursor-default'
-                                                        }`}
-                                                >
-                                                    <Shield className="w-3 h-3" />
-                                                    {roleInfo.label}
-                                                    {member.role !== 'owner' && <ChevronDown className="w-3 h-3" />}
-                                                </button>
-                                            )}
-                                        </td>
-                                        <td className="p-4">
-                                            <span className={`px-2 py-1 rounded-lg text-xs ${member.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                                                }`}>
-                                                {member.is_active ? 'Aktif' : 'Nonaktif'}
-                                            </span>
-                                        </td>
-                                        <td className="p-4">
-                                            {member.role !== 'owner' && (
-                                                <button
-                                                    onClick={() => handleToggle(member.id)}
-                                                    className="transition-colors"
-                                                    title={member.is_active ? 'Nonaktifkan' : 'Aktifkan'}
-                                                >
-                                                    {member.is_active ? (
-                                                        <ToggleRight className="w-6 h-6 text-green-400" />
-                                                    ) : (
-                                                        <ToggleLeft className="w-6 h-6 text-red-400" />
-                                                    )}
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                            </td>
+                                            <td className="p-4 text-sm text-white/70 mobile-hide">{member.email}</td>
+                                            <td className="p-4">
+                                                {editingRole === member.id && member.role !== 'owner' ? (
+                                                    <select
+                                                        value={member.role}
+                                                        onChange={e => handleRoleChange(member.id, e.target.value)}
+                                                        onBlur={() => setEditingRole(null)}
+                                                        autoFocus
+                                                        className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white text-xs focus:outline-none"
+                                                    >
+                                                        <option value="admin" className="bg-[#1a1a2e]">Admin</option>
+                                                        <option value="finance" className="bg-[#1a1a2e]">Finance</option>
+                                                        <option value="outlet_manager" className="bg-[#1a1a2e]">Manager</option>
+                                                        <option value="cashier" className="bg-[#1a1a2e]">Kasir</option>
+                                                    </select>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => member.role !== 'owner' && setEditingRole(member.id)}
+                                                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${roleInfo.color} ${member.role !== 'owner' ? 'cursor-pointer hover:opacity-80' : 'cursor-default'
+                                                            }`}
+                                                    >
+                                                        <Shield className="w-3 h-3" />
+                                                        {roleInfo.label}
+                                                        {member.role !== 'owner' && <ChevronDown className="w-3 h-3" />}
+                                                    </button>
+                                                )}
+                                            </td>
+                                            <td className="p-4">
+                                                <span className={`px-2 py-1 rounded-lg text-xs ${member.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                                                    }`}>
+                                                    {member.is_active ? 'Aktif' : 'Nonaktif'}
+                                                </span>
+                                            </td>
+                                            <td className="p-4">
+                                                {member.role !== 'owner' && (
+                                                    <button
+                                                        onClick={() => handleToggle(member.id)}
+                                                        className="transition-colors"
+                                                        title={member.is_active ? 'Nonaktifkan' : 'Aktifkan'}
+                                                    >
+                                                        {member.is_active ? (
+                                                            <ToggleRight className="w-6 h-6 text-green-400" />
+                                                        ) : (
+                                                            <ToggleLeft className="w-6 h-6 text-red-400" />
+                                                        )}
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                     {members.length === 0 && (
                         <div className="p-8 text-center text-white/40">Belum ada anggota tim</div>
                     )}

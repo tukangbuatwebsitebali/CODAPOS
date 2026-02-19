@@ -328,7 +328,7 @@ export default function SettingsPage() {
         <div className="space-y-6 relative">
             {/* ─── Toast ─── */}
             {toast && (
-                <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl animate-slide-in-right ${toast.type === "success"
+                <div className={`fixed top-4 right-4 left-4 sm:left-auto z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl animate-slide-in-right ${toast.type === "success"
                     ? "bg-green-500/10 border-green-500/20 text-green-400"
                     : "bg-red-500/10 border-red-500/20 text-red-400"
                     }`}>
@@ -341,9 +341,9 @@ export default function SettingsPage() {
             )}
 
             {/* ─── Header ─── */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DA1F2] to-[#A7D8FF] flex items-center justify-center shadow-lg shadow-blue-500/20">
                             <Settings className="w-5 h-5 text-white" />
                         </div>
@@ -352,7 +352,7 @@ export default function SettingsPage() {
                     <p className="text-white/40 text-sm mt-1">Kelola bisnis, langganan, dan keamanan akun Anda</p>
                 </div>
                 {isPro && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 self-start sm:self-auto">
                         <Crown className="w-4 h-4 text-yellow-400" />
                         <span className="text-xs font-semibold text-yellow-400">PRO</span>
                     </div>
@@ -368,13 +368,13 @@ export default function SettingsPage() {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${isActive
+                            className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${isActive
                                 ? "bg-[#1DA1F2] text-white shadow-lg shadow-blue-500/25"
                                 : "text-white/40 hover:text-white/70 hover:bg-white/5"
                                 }`}
                         >
                             <Icon className="w-4 h-4" />
-                            {tab.label}
+                            <span className="hidden sm:inline">{tab.label}</span>
                         </button>
                     );
                 })}

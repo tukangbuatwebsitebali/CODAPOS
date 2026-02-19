@@ -64,7 +64,7 @@ export default function COAPage() {
     return (
         <div className="space-y-6">
             <div className="animate-fade-in">
-                <h1 className="text-2xl font-bold text-white">Chart of Accounts</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-white">Chart of Accounts</h1>
                 <p className="text-sm text-white/40 mt-1">Bagan akun standar bisnis Anda ({accounts.length} akun)</p>
             </div>
 

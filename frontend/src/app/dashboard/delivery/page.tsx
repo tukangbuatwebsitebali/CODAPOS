@@ -270,7 +270,7 @@ export default function MyKurirPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
                         <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg shadow-emerald-500/25">
                             <Truck className="w-6 h-6 text-white" />
                         </div>

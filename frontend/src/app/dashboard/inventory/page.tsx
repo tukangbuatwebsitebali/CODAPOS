@@ -144,9 +144,9 @@ export default function InventoryPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between animate-fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Inventori</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-white">Inventori</h1>
                     <p className="text-sm text-white/40 mt-1">Kelola stok produk per outlet</p>
                 </div>
                 {outlets.length > 1 && (
@@ -212,74 +212,76 @@ export default function InventoryPage() {
                 </div>
             ) : (
                 <div className="glass p-0 overflow-hidden animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                    <table className="table-glass">
-                        <thead>
-                            <tr>
-                                <th>Produk</th>
-                                <th>SKU</th>
-                                <th className="text-right">Stok</th>
-                                <th className="text-right">Min. Stok</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {inventory.map((item) => {
-                                const status = getStockBadge(item);
-                                return (
-                                    <tr key={item.id}>
-                                        <td>
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
-                                                    <Package className="w-5 h-5 text-white/20" />
+                    <div className="overflow-x-auto">
+                        <table className="table-glass">
+                            <thead>
+                                <tr>
+                                    <th>Produk</th>
+                                    <th className="mobile-hide">SKU</th>
+                                    <th className="text-right">Stok</th>
+                                    <th className="text-right mobile-hide">Min. Stok</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {inventory.map((item) => {
+                                    const status = getStockBadge(item);
+                                    return (
+                                        <tr key={item.id}>
+                                            <td>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                                                        <Package className="w-5 h-5 text-white/20" />
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-medium text-white">
+                                                            {item.product?.name || "Produk"}
+                                                        </span>
+                                                        {item.variant && (
+                                                            <p className="text-xs text-white/30">{item.variant.name}</p>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <span className="font-medium text-white">
-                                                        {item.product?.name || "Produk"}
-                                                    </span>
-                                                    {item.variant && (
-                                                        <p className="text-xs text-white/30">{item.variant.name}</p>
-                                                    )}
+                                            </td>
+                                            <td className="font-mono text-white/50 text-sm mobile-hide">
+                                                {item.product?.sku || item.variant?.sku || "—"}
+                                            </td>
+                                            <td className="text-right">
+                                                <span className={`text-lg font-bold ${item.quantity <= 0 ? "text-red-400" : item.min_stock > 0 && item.quantity <= item.min_stock ? "text-yellow-400" : "text-white"}`}>
+                                                    {item.quantity.toLocaleString("id-ID")}
+                                                </span>
+                                            </td>
+                                            <td className="text-right text-white/40 mobile-hide">
+                                                {item.min_stock > 0 ? item.min_stock.toLocaleString("id-ID") : "—"}
+                                            </td>
+                                            <td>
+                                                <span className={`badge ${status.class}`}>{status.label}</span>
+                                            </td>
+                                            <td>
+                                                <div className="flex gap-1">
+                                                    <button
+                                                        onClick={() => openAdjustModal(item)}
+                                                        className="btn-ghost p-2"
+                                                        title="Atur Stok"
+                                                    >
+                                                        <Settings className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => openHistory(item.product_id)}
+                                                        className="btn-ghost p-2"
+                                                        title="Riwayat Pergerakan"
+                                                    >
+                                                        <History className="w-4 h-4" />
+                                                    </button>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="font-mono text-white/50 text-sm">
-                                            {item.product?.sku || item.variant?.sku || "—"}
-                                        </td>
-                                        <td className="text-right">
-                                            <span className={`text-lg font-bold ${item.quantity <= 0 ? "text-red-400" : item.min_stock > 0 && item.quantity <= item.min_stock ? "text-yellow-400" : "text-white"}`}>
-                                                {item.quantity.toLocaleString("id-ID")}
-                                            </span>
-                                        </td>
-                                        <td className="text-right text-white/40">
-                                            {item.min_stock > 0 ? item.min_stock.toLocaleString("id-ID") : "—"}
-                                        </td>
-                                        <td>
-                                            <span className={`badge ${status.class}`}>{status.label}</span>
-                                        </td>
-                                        <td>
-                                            <div className="flex gap-1">
-                                                <button
-                                                    onClick={() => openAdjustModal(item)}
-                                                    className="btn-ghost p-2"
-                                                    title="Atur Stok"
-                                                >
-                                                    <Settings className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => openHistory(item.product_id)}
-                                                    className="btn-ghost p-2"
-                                                    title="Riwayat Pergerakan"
-                                                >
-                                                    <History className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 

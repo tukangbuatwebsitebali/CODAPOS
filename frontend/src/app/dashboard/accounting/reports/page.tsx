@@ -57,7 +57,7 @@ export default function ReportsPage() {
     return (
         <div className="space-y-6">
             <div className="animate-fade-in">
-                <h1 className="text-2xl font-bold text-white">Laporan Keuangan</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-white">Laporan Keuangan</h1>
                 <p className="text-sm text-white/40 mt-1">Ringkasan laporan keuangan bisnis Anda</p>
             </div>
 
