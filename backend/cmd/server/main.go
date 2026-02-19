@@ -465,14 +465,8 @@ func main() {
 	forecastHandler.RegisterRoutes(protected)
 
 	// Phase 7: MyKurir (Delivery)
-	deliveryHandler.RegisterRoutes(protected)
-
-	// File upload
-	uploadHandler := handler.NewUploadHandler()
-	uploadHandler.RegisterRoutes(protected)
-
-	// Phase 7: Active delivery order count (for sidebar badge)
-	protected.Get("/delivery/orders/active-count", func(c *fiber.Ctx) error {
+	// Set active-count handler BEFORE RegisterRoutes so it's registered before :id wildcard
+	deliveryHandler.SetActiveCountHandler(func(c *fiber.Ctx) error {
 		tenantID := middleware.GetTenantID(c)
 		var count int64
 		db.Model(&domain.DeliveryOrder{}).Where(
@@ -481,6 +475,11 @@ func main() {
 		).Count(&count)
 		return c.JSON(fiber.Map{"success": true, "data": fiber.Map{"count": count}})
 	})
+	deliveryHandler.RegisterRoutes(protected)
+
+	// File upload
+	uploadHandler := handler.NewUploadHandler()
+	uploadHandler.RegisterRoutes(protected)
 
 	// Phase 7: Chat (merchant side)
 	chatGroup := protected.Group("/chat")

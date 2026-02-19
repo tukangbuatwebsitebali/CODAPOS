@@ -12,20 +12,29 @@ import (
 )
 
 type DeliveryHandler struct {
-	usecase *usecase.DeliveryUsecase
+	usecase            *usecase.DeliveryUsecase
+	activeCountHandler fiber.Handler
 }
 
 func NewDeliveryHandler(uc *usecase.DeliveryUsecase) *DeliveryHandler {
 	return &DeliveryHandler{usecase: uc}
 }
 
+// SetActiveCountHandler sets the handler for GET /delivery/orders/active-count
+func (h *DeliveryHandler) SetActiveCountHandler(handler fiber.Handler) {
+	h.activeCountHandler = handler
+}
+
 // RegisterRoutes registers delivery routes
 func (h *DeliveryHandler) RegisterRoutes(api fiber.Router) {
 	delivery := api.Group("/delivery")
 
-	// Orders
+	// Orders — static routes MUST be registered before :id wildcard
 	delivery.Post("/orders", h.CreateOrder)
 	delivery.Get("/orders", h.ListOrders)
+	if h.activeCountHandler != nil {
+		delivery.Get("/orders/active-count", h.activeCountHandler)
+	}
 	delivery.Get("/orders/:id", h.GetOrder)
 	delivery.Put("/orders/:id/status", h.UpdateStatus)
 	delivery.Put("/orders/:id/assign", h.AssignDriver)
