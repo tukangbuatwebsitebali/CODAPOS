@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import {
     Globe, Save, Loader2, CheckCircle, AlertTriangle, Plus, Trash2, X,
     Type, BarChart3, Zap, CreditCard, MessageCircle, HelpCircle, FileText, Sparkles,
-    Upload, Palette, PenTool, Edit3, Newspaper,
+    Upload, Palette, PenTool, Edit3, Newspaper, Monitor, TrendingUp, ArrowRight, Store, Star
 } from 'lucide-react';
 import { superAdminAPI, uploadAPI } from '@/lib/api';
 
@@ -43,6 +43,18 @@ interface PricingItem { name: string; price: number; period: string; desc: strin
 interface TestimonialItem { name: string; role: string; text: string; rating: number; avatar: string; }
 interface FAQItem { q: string; a: string; }
 interface BrandingData { logo_url: string; site_title: string; site_description: string; }
+interface BrandsData { title: string; brands: string[]; }
+interface BusinessTypeItem { name: string; emoji: string; desc: string; }
+interface BusinessTypesData { section: string; title: string; highlight: string; types: BusinessTypeItem[]; }
+interface ShowcaseItem { title: string; desc: string; emoji: string; features: string[]; }
+interface ShowcaseData { section: string; title1: string; highlight: string; title2: string; items: ShowcaseItem[]; }
+interface HowItWorksStep { step: string; title: string; desc: string; icon: string; }
+interface HowItWorksData { section: string; title1: string; highlight: string; title2: string; steps: HowItWorksStep[]; }
+interface CTAData { badge: string; title1: string; highlight: string; title2: string; sub: string; btn1: string; btn1_url: string; btn2: string; btn2_url: string; }
+interface FooterLink { label: string; url: string; }
+interface FooterColumn { title: string; links: FooterLink[]; }
+interface FooterData { desc: string; rights: string; columns: FooterColumn[]; }
+
 interface PageData { slug: string; title: string; content: string; }
 interface ArticleData {
     id: string; title: string; slug: string; excerpt: string;
@@ -81,23 +93,30 @@ const DEFAULT_PAGES: PageData[] = [
     { slug: 'help', title: 'Pusat Bantuan', content: '<h2>Pusat Bantuan</h2><p>Hubungi kami di support@codapos.com</p>' },
 ];
 
-const TABS: { key: CMSTab; label: string; icon: React.ReactNode; desc: string }[] = [
+const TABS: { key: CMSTab | 'brands' | 'biz' | 'showcase' | 'how' | 'cta' | 'footer'; label: string; icon: React.ReactNode; desc: string }[] = [
     { key: 'hero', label: 'Hero', icon: <Type className="w-4 h-4" />, desc: 'Banner, headline, CTA' },
-    { key: 'branding', label: 'Logo & Branding', icon: <Palette className="w-4 h-4" />, desc: 'Logo, judul situs' },
+    { key: 'branding', label: 'Branding', icon: <Palette className="w-4 h-4" />, desc: 'Logo, judul situs' },
+    { key: 'brands', label: 'Klien', icon: <Star className="w-4 h-4" />, desc: 'Logo/Nama klien' },
     { key: 'stats', label: 'Statistik', icon: <BarChart3 className="w-4 h-4" />, desc: 'Angka pencapaian' },
+    { key: 'biz', label: 'Bisnis', icon: <Store className="w-4 h-4" />, desc: 'Tipe bisnis' },
     { key: 'features', label: 'Fitur', icon: <Zap className="w-4 h-4" />, desc: 'Fitur unggulan' },
+    { key: 'showcase', label: 'Showcase', icon: <Monitor className="w-4 h-4" />, desc: 'Tampilan aplikasi' },
+    { key: 'how', label: 'Cara Kerja', icon: <TrendingUp className="w-4 h-4" />, desc: 'Langkah penggunaan' },
     { key: 'pricing', label: 'Harga', icon: <CreditCard className="w-4 h-4" />, desc: 'Paket langganan' },
     { key: 'testimonials', label: 'Testimoni', icon: <MessageCircle className="w-4 h-4" />, desc: 'Ulasan pelanggan' },
     { key: 'faq', label: 'FAQ', icon: <HelpCircle className="w-4 h-4" />, desc: 'Pertanyaan umum' },
+    { key: 'cta', label: 'CTA', icon: <ArrowRight className="w-4 h-4" />, desc: 'Call to action bawah' },
+    { key: 'footer', label: 'Footer', icon: <Globe className="w-4 h-4" />, desc: 'Tautan bawah' },
     { key: 'pages', label: 'Halaman', icon: <FileText className="w-4 h-4" />, desc: 'About, Terms, dll' },
     { key: 'blog', label: 'Blog', icon: <Newspaper className="w-4 h-4" />, desc: 'Artikel & post' },
 ];
 
 const CONFIG_KEYS: Record<string, string> = {
-    hero: 'website_hero', branding: 'website_branding',
-    stats: 'website_stats', features: 'website_features',
-    pricing: 'website_pricing', testimonials: 'website_testimonials',
-    faq: 'website_faq', pages: 'website_pages', blog: 'website_articles',
+    hero: 'website_hero', branding: 'website_branding', brands: 'website_brands',
+    stats: 'website_stats', biz: 'website_biz', features: 'website_features',
+    showcase: 'website_showcase', how: 'website_how', pricing: 'website_pricing',
+    testimonials: 'website_testimonials', faq: 'website_faq', cta: 'website_cta',
+    footer: 'website_footer', pages: 'website_pages', blog: 'website_articles',
 };
 
 function safeParseJSON<T>(json: string, fallback: T): T {
@@ -195,7 +214,7 @@ function CmsInput({ label, value, onChange, placeholder, type = 'text', rows }: 
 // ═══════════════════════════════════════════════════════════════
 
 export default function WebsiteCMSPage() {
-    const [activeTab, setActiveTab] = useState<CMSTab>('hero');
+    const [activeTab, setActiveTab] = useState<string>('hero');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -203,16 +222,40 @@ export default function WebsiteCMSPage() {
     // All data states
     const [hero, setHero] = useState<HeroData>(DEFAULT_HERO);
     const [branding, setBranding] = useState<BrandingData>(DEFAULT_BRANDING);
+    const [brandsData, setBrandsData] = useState<BrandsData>({ title: "DIPERCAYA OLEH BRAND TERKEMUKA", brands: ["☕ Kopi Kenangan", "🍽️ Warteg Modern", "🛒 TokoMart", "🧁 BakeryHQ", "💈 BarberKing"] });
     const [stats, setStats] = useState<StatItem[]>([
         { value: "10,000+", label: "UMKM Terdaftar", suffix: "" },
         { value: "500+", label: "Kota di Indonesia", suffix: "" },
         { value: "2.5M+", label: "Transaksi Diproses", suffix: "" },
         { value: "99.9%", label: "Uptime Server", suffix: "" },
     ]);
+    const [bizData, setBizData] = useState<BusinessTypesData>({
+        section: "SOLUSI BISNIS", title: "Cocok Untuk", highlight: "Berbagai Bisnis",
+        types: [
+            { name: "Kedai Kopi & Cafe", emoji: "☕", desc: "Manajemen pesanan & meja" },
+            { name: "Restoran & Rumah Makan", emoji: "🍽️", desc: "Sistem dapur terintegrasi" },
+            { name: "Retail & Minimarket", emoji: "🛍️", desc: "Barcode & inventori" },
+            { name: "Toko Roti & Kue", emoji: "🧁", desc: "Bahan baku & resep" },
+        ]
+    });
     const [features, setFeatures] = useState<FeatureItem[]>([
         { title: "POS Kasir Ultra-Cepat", desc: "Proses transaksi dalam 3 tap", gradient: "from-emerald-500 to-teal-600" },
         { title: "Manajemen Inventori", desc: "Stok realtime dan notifikasi otomatis", gradient: "from-blue-500 to-indigo-600" },
     ]);
+    const [showcase, setShowcase] = useState<ShowcaseData>({
+        section: "APLIKASI TERBAIK", title1: "Manajemen Bisnis", highlight: "Lebih Mudah", title2: "dalam Satu Aplikasi",
+        items: [
+            { title: "Dashboard Analitik", desc: "Pantau omzet realtime", emoji: "📊", features: ["Grafik penjualan", "Laporan harian", "Top produk"] }
+        ]
+    });
+    const [howData, setHowData] = useState<HowItWorksData>({
+        section: "CARA KERJA", title1: "Mulai dalam", highlight: "3 Langkah", title2: "Mudah",
+        steps: [
+            { step: "01", title: "Daftar Akun", desc: "Buat akun gratis dalam hitungan detik", icon: "Users" },
+            { step: "02", title: "Tambah Produk", desc: "Upload menu atau barang jualan Anda", icon: "Layers" },
+            { step: "03", title: "Mulai Jualan", desc: "Catat transaksi dan pantau laporan", icon: "TrendingUp" },
+        ]
+    });
     const [pricing, setPricing] = useState<PricingItem[]>([
         { name: "Free", price: 0, period: "selamanya", desc: "Untuk bisnis baru", features: ["1 Outlet", "30 Produk"], highlight: false },
         { name: "Pro", price: 99000, period: "/bulan", desc: "Untuk bisnis berkembang", features: ["5 Outlet", "Unlimited Produk"], highlight: true },
@@ -223,6 +266,19 @@ export default function WebsiteCMSPage() {
     const [faq, setFaq] = useState<FAQItem[]>([
         { q: "Apakah CODAPOS benar-benar gratis?", a: "Ya! Paket Free bisa digunakan selamanya." },
     ]);
+    const [cta, setCta] = useState<CTAData>({
+        badge: "TUMBUH BERSAMA KAMI", title1: "Siap membawa bisnis Anda ke", highlight: "Level Selanjutnya?", title2: "",
+        sub: "Bergabung dengan ribuan UMKM sukses lainnya menggunakan CODAPOS.",
+        btn1: "Daftar Sekarang", btn1_url: "/signup", btn2: "Lihat Harga", btn2_url: "#harga"
+    });
+    const [footerData, setFooterData] = useState<FooterData>({
+        desc: "Platform Point of Sale (POS) cloud terdepan untuk merchant dan UMKM modern di seluruh Indonesia.",
+        rights: "All rights reserved.",
+        columns: [
+            { title: "Produk", links: [{ label: "Aplikasi POS", url: "/" }] },
+            { title: "Perusahaan", links: [{ label: "Tentang Kami", url: "/about" }] }
+        ]
+    });
     const [pages, setPages] = useState<PageData[]>(DEFAULT_PAGES);
     const [editingPageSlug, setEditingPageSlug] = useState<string | null>(null);
     const [articles, setArticles] = useState<ArticleData[]>([]);
@@ -259,11 +315,17 @@ export default function WebsiteCMSPage() {
                 setHero(normalized);
             }
             if (map.website_branding) setBranding(safeParseJSON(map.website_branding, DEFAULT_BRANDING));
+            if (map.website_brands) setBrandsData(safeParseJSON(map.website_brands, brandsData));
             if (map.website_stats) setStats(safeParseJSON(map.website_stats, stats));
+            if (map.website_biz) setBizData(safeParseJSON(map.website_biz, bizData));
             if (map.website_features) setFeatures(safeParseJSON(map.website_features, features));
+            if (map.website_showcase) setShowcase(safeParseJSON(map.website_showcase, showcase));
+            if (map.website_how) setHowData(safeParseJSON(map.website_how, howData));
             if (map.website_pricing) setPricing(safeParseJSON(map.website_pricing, pricing));
             if (map.website_testimonials) setTestimonials(safeParseJSON(map.website_testimonials, testimonials));
             if (map.website_faq) setFaq(safeParseJSON(map.website_faq, faq));
+            if (map.website_cta) setCta(safeParseJSON(map.website_cta, cta));
+            if (map.website_footer) setFooterData(safeParseJSON(map.website_footer, footerData));
             if (map.website_pages) setPages(safeParseJSON(map.website_pages, DEFAULT_PAGES));
             if (map.website_articles) setArticles(safeParseJSON(map.website_articles, []));
         } catch (err) {
@@ -285,11 +347,17 @@ export default function WebsiteCMSPage() {
                 switch (activeTab) {
                     case 'hero': value = JSON.stringify(hero); break;
                     case 'branding': value = JSON.stringify(branding); break;
+                    case 'brands': value = JSON.stringify(brandsData); break;
                     case 'stats': value = JSON.stringify(stats); break;
+                    case 'biz': value = JSON.stringify(bizData); break;
                     case 'features': value = JSON.stringify(features); break;
+                    case 'showcase': value = JSON.stringify(showcase); break;
+                    case 'how': value = JSON.stringify(howData); break;
                     case 'pricing': value = JSON.stringify(pricing); break;
                     case 'testimonials': value = JSON.stringify(testimonials); break;
                     case 'faq': value = JSON.stringify(faq); break;
+                    case 'cta': value = JSON.stringify(cta); break;
+                    case 'footer': value = JSON.stringify(footerData); break;
                     case 'pages': value = JSON.stringify(pages); break;
                     case 'blog': value = JSON.stringify(articles); break;
                     default: return;
@@ -618,6 +686,161 @@ export default function WebsiteCMSPage() {
                                     <textarea value={item.a} onChange={e => { const n = [...faq]; n[i].a = e.target.value; setFaq(n); }} placeholder="Jawaban..." rows={3} className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500/50 transition resize-none" />
                                 </div>
                             ))}
+                        </div>
+                    )}
+
+                    {/* ══════════ BRANDS ══════════ */}
+                    {activeTab === 'brands' && (
+                        <div className="glass p-6 space-y-4">
+                            <h3 className="text-lg font-semibold text-white">Logo Klien (Teks/Emoji)</h3>
+                            <CmsInput label="Judul Section" value={brandsData.title} onChange={v => setBrandsData({ ...brandsData, title: v })} placeholder="DIPERCAYA OLEH..." />
+                            <div>
+                                <label className="text-xs text-white/50 mb-2 block">Daftar Brand (satu per baris)</label>
+                                <textarea
+                                    value={brandsData.brands.join('\n')}
+                                    onChange={e => setBrandsData({ ...brandsData, brands: e.target.value.split('\n') })}
+                                    rows={8}
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500/50 transition resize-none"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ══════════ BUSINESS TYPES ══════════ */}
+                    {activeTab === 'biz' && (
+                        <div className="glass p-6 space-y-4">
+                            <h3 className="text-lg font-semibold text-white">Tipe Bisnis</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <CmsInput label="Label Section" value={bizData.section} onChange={v => setBizData({ ...bizData, section: v })} />
+                                <CmsInput label="Judul Utama" value={bizData.title} onChange={v => setBizData({ ...bizData, title: v })} />
+                                <CmsInput label="Teks Highlight (Gradien)" value={bizData.highlight} onChange={v => setBizData({ ...bizData, highlight: v })} />
+                            </div>
+
+                            <div className="flex items-center justify-between mt-6">
+                                <h4 className="text-sm font-semibold text-white">Daftar Bisnis</h4>
+                                <button onClick={() => setBizData({ ...bizData, types: [...bizData.types, { name: "", emoji: "🏪", desc: "" }] })} className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-medium hover:bg-emerald-500/30 transition flex items-center gap-1"><Plus className="w-3 h-3" /> Tambah</button>
+                            </div>
+                            {bizData.types.map((type, i) => (
+                                <div key={i} className="p-4 bg-white/5 rounded-xl border border-white/5 grid grid-cols-12 gap-3 items-end">
+                                    <div className="col-span-2"><label className="text-xs text-white/40 block mb-1">Emoji</label><input type="text" value={type.emoji} onChange={e => { const n = { ...bizData }; n.types[i].emoji = e.target.value; setBizData(n); }} className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-white text-center" /></div>
+                                    <div className="col-span-4"><label className="text-xs text-white/40 block mb-1">Nama Bisnis</label><input type="text" value={type.name} onChange={e => { const n = { ...bizData }; n.types[i].name = e.target.value; setBizData(n); }} className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-white" /></div>
+                                    <div className="col-span-5"><label className="text-xs text-white/40 block mb-1">Deskripsi Singkat</label><input type="text" value={type.desc} onChange={e => { const n = { ...bizData }; n.types[i].desc = e.target.value; setBizData(n); }} className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-white" /></div>
+                                    <div className="col-span-1 flex justify-end pb-2"><button onClick={() => { const n = { ...bizData }; n.types = n.types.filter((_, j) => j !== i); setBizData(n); }} className="text-red-400 hover:text-red-300"><Trash2 className="w-4 h-4" /></button></div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* ══════════ SHOWCASE ══════════ */}
+                    {activeTab === 'showcase' && (
+                        <div className="glass p-6 space-y-4">
+                            <h3 className="text-lg font-semibold text-white">App Showcase</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                <CmsInput label="Label Section" value={showcase.section} onChange={v => setShowcase({ ...showcase, section: v })} />
+                                <CmsInput label="Judul 1" value={showcase.title1} onChange={v => setShowcase({ ...showcase, title1: v })} />
+                                <CmsInput label="Highlight" value={showcase.highlight} onChange={v => setShowcase({ ...showcase, highlight: v })} />
+                                <CmsInput label="Judul 2" value={showcase.title2} onChange={v => setShowcase({ ...showcase, title2: v })} />
+                            </div>
+
+                            <div className="flex items-center justify-between mt-6">
+                                <h4 className="text-sm font-semibold text-white">Fitur Showcase</h4>
+                                <button onClick={() => setShowcase({ ...showcase, items: [...showcase.items, { title: "", desc: "", emoji: "📱", features: [] }] })} className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-medium hover:bg-emerald-500/30 transition flex items-center gap-1"><Plus className="w-3 h-3" /> Tambah</button>
+                            </div>
+                            {showcase.items.map((item, i) => (
+                                <div key={i} className="p-4 bg-white/5 rounded-xl border border-white/5 space-y-3">
+                                    <div className="flex justify-between"><span className="text-xs font-bold text-white/50">Item #{i + 1}</span><button onClick={() => { const n = { ...showcase }; n.items = n.items.filter((_, j) => j !== i); setShowcase(n); }} className="text-red-400"><Trash2 className="w-4 h-4" /></button></div>
+                                    <div className="grid grid-cols-12 gap-3">
+                                        <div className="col-span-2"><CmsInput label="Emoji" value={item.emoji} onChange={v => { const n = { ...showcase }; n.items[i].emoji = v; setShowcase(n); }} /></div>
+                                        <div className="col-span-4"><CmsInput label="Judul" value={item.title} onChange={v => { const n = { ...showcase }; n.items[i].title = v; setShowcase(n); }} /></div>
+                                        <div className="col-span-6"><CmsInput label="Deskripsi" value={item.desc} onChange={v => { const n = { ...showcase }; n.items[i].desc = v; setShowcase(n); }} /></div>
+                                    </div>
+                                    <div><label className="text-xs text-white/40 block mb-1">List Poin (satu per baris)</label><textarea value={item.features.join('\n')} onChange={e => { const n = { ...showcase }; n.items[i].features = e.target.value.split('\n'); setShowcase(n); }} rows={3} className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-white" /></div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* ══════════ HOW IT WORKS ══════════ */}
+                    {activeTab === 'how' && (
+                        <div className="glass p-6 space-y-4">
+                            <h3 className="text-lg font-semibold text-white">Cara Kerja</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                <CmsInput label="Label Section" value={howData.section} onChange={v => setHowData({ ...howData, section: v })} />
+                                <CmsInput label="Judul 1" value={howData.title1} onChange={v => setHowData({ ...howData, title1: v })} />
+                                <CmsInput label="Highlight" value={howData.highlight} onChange={v => setHowData({ ...howData, highlight: v })} />
+                                <CmsInput label="Judul 2" value={howData.title2} onChange={v => setHowData({ ...howData, title2: v })} />
+                            </div>
+
+                            <div className="flex items-center justify-between mt-6">
+                                <h4 className="text-sm font-semibold text-white">Langkah-langkah</h4>
+                                <button onClick={() => setHowData({ ...howData, steps: [...howData.steps, { step: "04", title: "", desc: "", icon: "Check" }] })} className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-medium hover:bg-emerald-500/30 transition flex items-center gap-1"><Plus className="w-3 h-3" /> Tambah</button>
+                            </div>
+                            {howData.steps.map((step, i) => (
+                                <div key={i} className="p-4 bg-white/5 rounded-xl border border-white/5 grid grid-cols-12 gap-3 items-end">
+                                    <div className="col-span-2"><label className="text-xs text-white/40 block mb-1">Nomor (01)</label><input type="text" value={step.step} onChange={e => { const n = { ...howData }; n.steps[i].step = e.target.value; setHowData(n); }} className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-white" /></div>
+                                    <div className="col-span-4"><label className="text-xs text-white/40 block mb-1">Judul Langkah</label><input type="text" value={step.title} onChange={e => { const n = { ...howData }; n.steps[i].title = e.target.value; setHowData(n); }} className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-white" /></div>
+                                    <div className="col-span-5"><label className="text-xs text-white/40 block mb-1">Deskripsi</label><input type="text" value={step.desc} onChange={e => { const n = { ...howData }; n.steps[i].desc = e.target.value; setHowData(n); }} className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-white" /></div>
+                                    <div className="col-span-1 flex justify-end pb-2"><button onClick={() => { const n = { ...howData }; n.steps = n.steps.filter((_, j) => j !== i); setHowData(n); }} className="text-red-400 hover:text-red-300"><Trash2 className="w-4 h-4" /></button></div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* ══════════ CTA ══════════ */}
+                    {activeTab === 'cta' && (
+                        <div className="glass p-6 space-y-4">
+                            <h3 className="text-lg font-semibold text-white flex items-center gap-2">Banner CTA Bawah</h3>
+                            <CmsInput label="Badge" value={cta.badge} onChange={v => setCta({ ...cta, badge: v })} />
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <CmsInput label="Judul 1" value={cta.title1} onChange={v => setCta({ ...cta, title1: v })} />
+                                <CmsInput label="Highlight" value={cta.highlight} onChange={v => setCta({ ...cta, highlight: v })} />
+                                <CmsInput label="Judul 2" value={cta.title2} onChange={v => setCta({ ...cta, title2: v })} />
+                            </div>
+                            <CmsInput label="Subteks CTA" value={cta.sub} onChange={v => setCta({ ...cta, sub: v })} rows={2} />
+
+                            <div className="grid grid-cols-2 gap-4 mt-4">
+                                <div className="space-y-2">
+                                    <CmsInput label="Tombol 1 (Teks)" value={cta.btn1} onChange={v => setCta({ ...cta, btn1: v })} />
+                                    <CmsInput label="Tombol 1 (URL)" value={cta.btn1_url} onChange={v => setCta({ ...cta, btn1_url: v })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <CmsInput label="Tombol 2 (Teks)" value={cta.btn2} onChange={v => setCta({ ...cta, btn2: v })} />
+                                    <CmsInput label="Tombol 2 (URL)" value={cta.btn2_url} onChange={v => setCta({ ...cta, btn2_url: v })} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ══════════ FOOTER ══════════ */}
+                    {activeTab === 'footer' && (
+                        <div className="glass p-6 space-y-4">
+                            <h3 className="text-lg font-semibold text-white flex items-center gap-2"><Globe className="w-5 h-5 text-emerald-400" /> Tampilan Footer</h3>
+                            <CmsInput label="Deskripsi di Bawah Logo" value={footerData.desc} onChange={v => setFooterData({ ...footerData, desc: v })} rows={2} />
+                            <CmsInput label="Teks Hak Cipta (Samping tahun)" value={footerData.rights} onChange={v => setFooterData({ ...footerData, rights: v })} placeholder="All rights reserved." />
+
+                            <div className="flex items-center justify-between mt-6">
+                                <h4 className="text-sm font-semibold text-white">Kolom Tautan</h4>
+                                <button onClick={() => setFooterData({ ...footerData, columns: [...footerData.columns, { title: "Kolom Baru", links: [] }] })} className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-medium hover:bg-emerald-500/30 transition flex items-center gap-1"><Plus className="w-3 h-3" /> Tambah Kolom</button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {footerData.columns.map((col, cIdx) => (
+                                    <div key={cIdx} className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <input type="text" value={col.title} onChange={e => { const n = { ...footerData }; n.columns[cIdx].title = e.target.value; setFooterData(n); }} className="p-2 bg-transparent border-b border-white/20 text-white font-bold focus:outline-none" placeholder="Judul Kolom" />
+                                            <button onClick={() => { const n = { ...footerData }; n.columns = n.columns.filter((_, idx) => idx !== cIdx); setFooterData(n); }} className="text-red-400"><Trash2 className="w-4 h-4" /></button>
+                                        </div>
+                                        {col.links.map((link, lIdx) => (
+                                            <div key={lIdx} className="flex gap-2 items-center">
+                                                <input type="text" value={link.label} onChange={e => { const n = { ...footerData }; n.columns[cIdx].links[lIdx].label = e.target.value; setFooterData(n); }} className="flex-1 p-2 bg-white/5 border border-white/10 rounded-lg text-white text-xs" placeholder="Label Tautan" />
+                                                <input type="text" value={link.url} onChange={e => { const n = { ...footerData }; n.columns[cIdx].links[lIdx].url = e.target.value; setFooterData(n); }} className="flex-1 p-2 bg-white/5 border border-white/10 rounded-lg text-white text-xs" placeholder="URL" />
+                                                <button onClick={() => { const n = { ...footerData }; n.columns[cIdx].links = n.columns[cIdx].links.filter((_, j) => j !== lIdx); setFooterData(n); }} className="text-red-400/50 hover:text-red-400"><X className="w-4 h-4" /></button>
+                                            </div>
+                                        ))}
+                                        <button onClick={() => { const n = { ...footerData }; n.columns[cIdx].links.push({ label: "", url: "" }); setFooterData(n); }} className="text-xs text-emerald-400 mt-2 block w-full text-center">+ Tambah Tautan</button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
 

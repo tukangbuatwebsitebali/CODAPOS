@@ -24,3 +24,4 @@ plugins {
 }
 
 include(":app")
+rootProject.name = "flutter_pos"
