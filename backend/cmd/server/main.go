@@ -20,6 +20,7 @@ import (
 	"github.com/codapos/backend/internal/migration"
 	"github.com/codapos/backend/internal/repository"
 	"github.com/codapos/backend/internal/usecase"
+	"github.com/codapos/backend/internal/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -611,20 +612,12 @@ func main() {
 			return c.Status(400).JSON(fiber.Map{"success": false, "error": "Only webp, jpg, jpeg, png files are allowed"})
 		}
 
-		// Generate unique filename
-		filename := fmt.Sprintf("product_%d%s", time.Now().UnixNano(), ext)
-		savePath := filepath.Join("uploads", filename)
-
-		if err := c.SaveFile(file, savePath); err != nil {
-			return c.Status(500).JSON(fiber.Map{"success": false, "error": "Failed to save image"})
+		// Upload to Cloudinary (or local fallback)
+		imageURL, uploadErr := util.CloudinaryUpload(file)
+		if uploadErr != nil {
+			return c.Status(500).JSON(fiber.Map{"success": false, "error": "Failed to upload image: " + uploadErr.Error()})
 		}
 
-		// Return full URL — use BASE_URL env var for Railway production
-		baseURL := os.Getenv("BASE_URL")
-		if baseURL == "" {
-			baseURL = c.BaseURL()
-		}
-		imageURL := fmt.Sprintf("%s/uploads/%s", baseURL, filename)
 		return c.JSON(fiber.Map{"success": true, "data": fiber.Map{"image_url": imageURL}})
 	})
 

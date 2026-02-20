@@ -1,13 +1,11 @@
 package handler
 
 import (
-	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/codapos/backend/internal/util"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 // UploadHandler handles file upload requests
@@ -49,39 +47,20 @@ func (h *UploadHandler) Upload(c *fiber.Ctx) error {
 		})
 	}
 
-	// Ensure uploads directory exists
-	uploadDir := "./uploads"
-	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+	// Upload to Cloudinary (or local fallback)
+	publicURL, err := util.CloudinaryUpload(file)
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"error":   "Failed to create upload directory",
+			"error":   "Failed to upload file: " + err.Error(),
 		})
 	}
-
-	// Generate unique filename
-	filename := fmt.Sprintf("%s%s", uuid.New().String(), ext)
-	savePath := filepath.Join(uploadDir, filename)
-
-	// Save file
-	if err := c.SaveFile(file, savePath); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"error":   "Failed to save file",
-		})
-	}
-
-	// Build public URL — prefer BASE_URL env var (for Railway/production)
-	baseURL := os.Getenv("BASE_URL")
-	if baseURL == "" {
-		baseURL = c.BaseURL()
-	}
-	publicURL := fmt.Sprintf("%s/uploads/%s", baseURL, filename)
 
 	return c.JSON(fiber.Map{
 		"success": true,
 		"data": fiber.Map{
 			"url":      publicURL,
-			"filename": filename,
+			"filename": filepath.Base(publicURL),
 		},
 		"message": "File uploaded successfully",
 	})
