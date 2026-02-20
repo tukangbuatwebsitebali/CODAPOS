@@ -225,7 +225,7 @@ export default function LoginPage() {
 
                             <div className="mt-4 text-center">
                                 <Link href="/signup" className="text-xs text-[#1DA1F2]/60 hover:text-[#1DA1F2] transition-colors">
-                                    Daftar sebagai Pelanggan →
+                                    Daftar Merchant Gratis →
                                 </Link>
                             </div>
                         </form>
