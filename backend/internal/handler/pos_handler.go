@@ -121,3 +121,53 @@ func (h *POSHandler) ReprintTransaction(c *fiber.Ctx) error {
 
 	return response.Success(c, tx, "reprint logged successfully")
 }
+
+// GetTenantBillings returns MDR invoices for a specific tenant
+func (h *POSHandler) GetTenantBillings(c *fiber.Ctx) error {
+	tenantID := middleware.GetTenantID(c)
+
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	perPage, _ := strconv.Atoi(c.Query("per_page", "20"))
+
+	billings, total, err := h.posUsecase.GetTenantBillings(tenantID, page, perPage)
+	if err != nil {
+		return response.InternalError(c, "failed to fetch tenant billings")
+	}
+
+	totalPages := (total + int64(perPage) - 1) / int64(perPage)
+	return response.SuccessWithMeta(c, billings, &response.Meta{
+		Page:       page,
+		PerPage:    perPage,
+		Total:      total,
+		TotalPages: totalPages,
+	})
+}
+
+// GenerateMonthlyBillings triggers the aggregation of last month's MDR invoices
+func (h *POSHandler) GenerateMonthlyBillings(c *fiber.Ctx) error {
+	// Usually triggered by a cron job or Superadmin manually
+	err := h.posUsecase.GenerateMonthlyBillings()
+	if err != nil {
+		return response.InternalError(c, "failed to generate monthly billings: "+err.Error())
+	}
+
+	return response.Success(c, nil, "monthly billings generated successfully")
+}
+
+// PayTenantBilling processes a payment for a specific MDR invoice
+func (h *POSHandler) PayTenantBilling(c *fiber.Ctx) error {
+	tenantID := middleware.GetTenantID(c)
+
+	idStr := c.Params("id")
+	billingID, err := uuid.Parse(idStr)
+	if err != nil {
+		return response.BadRequest(c, "invalid billing ID")
+	}
+
+	bill, err := h.posUsecase.PayTenantBilling(tenantID, billingID)
+	if err != nil {
+		return response.BadRequest(c, err.Error())
+	}
+
+	return response.Success(c, bill, "billing paid successfully")
+}

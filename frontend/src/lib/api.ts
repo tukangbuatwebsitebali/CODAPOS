@@ -126,6 +126,12 @@ export const posAPI = {
     },
     getTransaction: (id: string) => api.get(`/pos/transactions/${id}`),
     reprintTransaction: (id: string) => api.post(`/pos/transactions/${id}/reprint`),
+    getBillings: (page?: number) => {
+        const params = new URLSearchParams();
+        if (page) params.set('page', page.toString());
+        return api.get(`/pos/billings?${params.toString()}`);
+    },
+    payBilling: (id: string) => api.post(`/pos/billings/${id}/pay`),
 };
 
 // ======= ACCOUNTING =======
@@ -174,21 +180,16 @@ export const superAdminAPI = {
         api.put(`/admin/merchants/${merchantId}/features`, { feature_key: featureKey, enabled }),
     enableAllFeatures: (merchantId: string) => api.put(`/admin/merchants/${merchantId}/features/enable-all`),
 
-    // Global Config
+    // Config & Permissions
     getConfigs: () => api.get('/admin/config'),
-    setConfig: (key: string, value: string, description?: string) =>
-        api.put('/admin/config', { key, value, description }),
+    setConfig: (key: string, value: string, description?: string) => api.put(`/admin/config/${key}`, { value, description }),
+    getRolePermissions: () => api.get('/admin/permissions'),
+    setRolePermission: (role: string, action: string, allowed: boolean) => api.post('/admin/permissions', { role, action, is_allowed: allowed }),
 
-    // Role Permissions (RBAC)
-    getRolePermissions: () => api.get('/admin/role-permissions'),
-    getRolePermissionsByRole: (role: string) => api.get(`/admin/role-permissions/${role}`),
-    setRolePermission: (role: string, action: string, is_allowed: boolean) =>
-        api.put('/admin/role-permissions', { role, action, is_allowed }),
-    bulkSetRolePermissions: (role: string, permissions: { action: string; is_allowed: boolean }[]) =>
-        api.put('/admin/role-permissions/bulk', { role, permissions }),
-};
-
-// ======= INVENTORY =======
+    // Revenue Analysis (MDR Margin + Penalty)
+    getRevenueStats: () => api.get('/admin/revenue/stats'),
+    getRevenueByMerchant: (page = 1, limit = 20) => api.get(`/admin/revenue/merchants?page=${page}&limit=${limit}`),
+};// ======= INVENTORY =======
 export const inventoryAPI = {
     getStock: (outletId: string) => api.get(`/inventory?outlet_id=${outletId}`),
     getLowStock: (outletId: string) => api.get(`/inventory/low-stock?outlet_id=${outletId}`),

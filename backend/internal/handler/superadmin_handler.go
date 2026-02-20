@@ -49,6 +49,10 @@ func (h *SuperAdminHandler) RegisterRoutes(api fiber.Router) {
 	admin.Get("/role-permissions/:role", h.GetRolePermissionsByRole)
 	admin.Put("/role-permissions", h.SetRolePermission)
 	admin.Put("/role-permissions/bulk", h.BulkSetRolePermissions)
+
+	// Revenue Analysis (MDR Margin + Penalty)
+	admin.Get("/revenue/stats", h.GetRevenueStats)
+	admin.Get("/revenue/merchants", h.GetRevenueByMerchant)
 }
 
 // ========================
@@ -398,4 +402,39 @@ func (h *SuperAdminHandler) BulkSetRolePermissions(c *fiber.Ctx) error {
 	}
 
 	return response.Success(c, fiber.Map{"message": "permissions updated"}, "ok")
+}
+
+// ========================
+// Revenue Analysis (MDR Margin + Penalty)
+// ========================
+
+func (h *SuperAdminHandler) GetRevenueStats(c *fiber.Ctx) error {
+	stats, err := h.usecase.GetRevenueStats()
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	return response.Success(c, stats, "revenue stats retrieved")
+}
+
+func (h *SuperAdminHandler) GetRevenueByMerchant(c *fiber.Ctx) error {
+	limit, _ := strconv.Atoi(c.Query("limit", "20"))
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	if page < 1 {
+		page = 1
+	}
+	offset := (page - 1) * limit
+
+	merchants, total, err := h.usecase.GetRevenueByMerchant(limit, offset)
+	if err != nil {
+		return response.Error(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"data":    merchants,
+		"total":   total,
+		"page":    page,
+		"limit":   limit,
+	})
 }

@@ -54,6 +54,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.TransactionItem{},
 		&domain.TransactionPayment{},
 		&domain.SplitBill{},
+		&domain.TenantBilling{},
 
 		// Accounting
 		&domain.ChartOfAccount{},

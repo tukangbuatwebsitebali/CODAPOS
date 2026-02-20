@@ -87,17 +87,19 @@ func main() {
 	rolePermRepo := repository.NewRolePermissionRepository(db)
 	chatRepo := repository.NewChatRepository(db)
 	businessUnitRepo := repository.NewBusinessUnitRepository(db)
+	tenantBillingRepo := repository.NewTenantBillingRepository(db)
+	superAdminRepo := repository.NewSuperAdminRepository(db)
 
 	// Initialize usecases
 	authUsecase := usecase.NewAuthUsecase(tenantRepo, userRepo, merchantTypeRepo, featureFlagRepo, cfg)
-	posUsecase := usecase.NewPOSUsecase(transactionRepo, productRepo, inventoryRepo, accountingRepo)
+	posUsecase := usecase.NewPOSUsecase(transactionRepo, productRepo, inventoryRepo, accountingRepo, tenantBillingRepo)
 	productUsecase := usecase.NewProductUsecase(productRepo, categoryRepo)
 	inventoryUsecase := usecase.NewInventoryUsecase(inventoryRepo)
 	outletUsecase := usecase.NewOutletUsecase(outletRepo, brandRepo, regionRepo)
 	accountingUsecase := usecase.NewAccountingUsecase(accountingRepo)
 	// Phase 1 usecases
 	customerUsecase := usecase.NewCustomerUsecase(customerRepo, tenantRepo)
-	superAdminUsecase := usecase.NewSuperAdminUsecase(tenantRepo, merchantTypeRepo, featureFlagRepo, globalConfigRepo, rolePermRepo)
+	superAdminUsecase := usecase.NewSuperAdminUsecase(tenantRepo, merchantTypeRepo, featureFlagRepo, globalConfigRepo, rolePermRepo, superAdminRepo)
 	// Phase 2 usecases
 	userUsecase := usecase.NewUserUsecase(userRepo, tenantRepo)
 	// Phase 5 usecases
@@ -643,6 +645,8 @@ func main() {
 	pos.Get("/transactions", middleware.PermissionMiddleware(middleware.ActionReadTransactions), posHandler.GetTransactions)
 	pos.Get("/transactions/:id", middleware.PermissionMiddleware(middleware.ActionReadTransactions), posHandler.GetTransaction)
 	pos.Post("/transactions/:id/reprint", middleware.PermissionMiddleware(middleware.ActionReadTransactions), posHandler.ReprintTransaction)
+	pos.Get("/billings", posHandler.GetTenantBillings)
+	pos.Post("/billings/:id/pay", posHandler.PayTenantBilling)
 
 	// Accounting (owner + finance only)
 	accounting := protected.Group("/accounting", middleware.PermissionMiddleware(middleware.ActionManageAccounting))
@@ -658,6 +662,10 @@ func main() {
 	// Super Admin routes (super_admin only)
 	adminProtected := api.Group("", middleware.AuthMiddleware(cfg), middleware.RoleMiddleware(domain.RoleSuperAdmin))
 	superAdminHandler.RegisterRoutes(adminProtected)
+
+	// Admin manual trigger for generating monthly bills
+	adminBills := adminProtected.Group("/bills")
+	adminBills.Post("/generate", posHandler.GenerateMonthlyBillings)
 
 	// Start server
 	port := fmt.Sprintf(":%s", cfg.AppPort)

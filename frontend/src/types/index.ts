@@ -190,6 +190,13 @@ export interface Transaction {
     reprint_count?: number;
     last_reprint_at?: string;
     created_at: string;
+    payment_method?: string;
+    mdr_rate_percentage?: number;
+    mdr_rate_flat?: number;
+    fee_midtrans?: number;
+    fee_codapos?: number;
+    total_mdr_merchant?: number;
+    net_profit?: number;
 }
 
 export interface TransactionItem {
@@ -238,6 +245,18 @@ export interface PaymentInput {
     payment_method: string;
     amount: number;
     reference_number?: string;
+}
+
+export interface TenantBilling {
+    id: string;
+    tenant_id: string;
+    billing_month: string;
+    total_transactions: number;
+    total_mdr: number;
+    penalty_fee: number;
+    status: 'unpaid' | 'paid' | 'past_due' | 'suspended';
+    created_at: string;
+    updated_at: string;
 }
 
 // =============================================
@@ -472,6 +491,30 @@ export interface UpdateCustomerRequest {
     phone?: string;
     email?: string;
     notes?: string;
+}
+
+// =============================================
+// SUPERADMIN APP REVENUE
+// =============================================
+
+export interface AppRevenueStats {
+    total_revenue: number;
+    total_mdr: number;
+    total_penalty: number;
+    revenue_this_month: number;
+    active_merchants: number;
+    total_transactions: number;
+    top_payment_method: string;
+}
+
+export interface AppRevenueMerchant {
+    tenant_id: string;
+    tenant_name: string;
+    total_transactions: number;
+    total_revenue_contributed: number;
+    total_mdr: number;
+    total_penalty: number;
+    last_transaction_date: string;
 }
 
 // =============================================

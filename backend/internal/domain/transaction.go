@@ -26,6 +26,13 @@ type Transaction struct {
 	OriginalTransactionID *uuid.UUID `json:"original_transaction_id,omitempty" gorm:"type:uuid"`
 	ReprintCount          int        `json:"reprint_count" gorm:"default:0"`
 	LastReprintAt         *time.Time `json:"last_reprint_at,omitempty"`
+	PaymentMethod         string     `json:"payment_method,omitempty" gorm:"size:50"`
+	MDRRatePercentage     float64    `json:"mdr_rate_percentage,omitempty" gorm:"type:decimal(5,2);default:0"`
+	MDRRateFlat           float64    `json:"mdr_rate_flat,omitempty" gorm:"type:decimal(15,2);default:0"`
+	FeeMidtrans           float64    `json:"fee_midtrans,omitempty" gorm:"type:decimal(15,2);default:0"`
+	FeeCodapos            float64    `json:"fee_codapos,omitempty" gorm:"type:decimal(15,2);default:0"`
+	TotalMDRMerchant      float64    `json:"total_mdr_merchant,omitempty" gorm:"type:decimal(15,2);default:0"`
+	NetProfit             float64    `json:"net_profit,omitempty" gorm:"type:decimal(15,2);default:0"`
 
 	// Relations
 	Outlet              *Outlet              `json:"outlet,omitempty" gorm:"foreignKey:OutletID"`
@@ -105,10 +112,24 @@ type SplitBill struct {
 	Amount        float64   `json:"amount" gorm:"type:decimal(15,2);not null"`
 	PaymentMethod string    `json:"payment_method,omitempty" gorm:"size:50"`
 	Status        string    `json:"status" gorm:"size:20;default:'pending'"`
-	CreatedAt     time.Time `json:"created_at"`
 }
 
 func (SplitBill) TableName() string { return "split_bills" }
+
+// TenantBilling represents monthly MDR invoice for a tenant
+type TenantBilling struct {
+	BaseModel
+	TenantID          uuid.UUID `json:"tenant_id" gorm:"type:uuid;not null;index"`
+	BillingMonth      string    `json:"billing_month" gorm:"size:10;not null;index"` // Format: MM-YYYY
+	TotalTransactions int       `json:"total_transactions" gorm:"not null;default:0"`
+	TotalMDR          float64   `json:"total_mdr" gorm:"type:decimal(15,2);not null;default:0"`
+	PenaltyFee        float64   `json:"penalty_fee" gorm:"type:decimal(15,2);not null;default:0"`
+	Status            string    `json:"status" gorm:"size:20;not null;default:'unpaid'"` // unpaid, paid, past_due, suspended
+
+	Tenant *Tenant `json:"tenant,omitempty" gorm:"foreignKey:TenantID"`
+}
+
+func (TenantBilling) TableName() string { return "tenant_billings" }
 
 // CheckoutRequest is the DTO for creating a transaction
 type CheckoutRequest struct {
@@ -144,6 +165,21 @@ type TransactionRepository interface {
 	Create(transaction *Transaction) error
 	FindByID(id uuid.UUID) (*Transaction, error)
 	FindByTenantID(tenantID uuid.UUID, outletID *uuid.UUID, limit, offset int) ([]Transaction, int64, error)
-	FindByNumber(number string) (*Transaction, error)
+	GetMDRMonthlyAggregation(month, year int) ([]struct {
+		TenantID    uuid.UUID
+		TotalTrx    int
+		TotalMDRVal float64
+	}, error)
 	Update(transaction *Transaction) error
+	Delete(id uuid.UUID) error
+}
+
+// TenantBillingRepository defines the interface for MDR invoice data access
+type TenantBillingRepository interface {
+	Create(billing *TenantBilling) error
+	GetByTenantAndMonth(tenantID uuid.UUID, month string) (*TenantBilling, error)
+	Update(billing *TenantBilling) error
+	FindAll(limit, offset int) ([]TenantBilling, int64, error)
+	FindByTenantID(tenantID uuid.UUID, limit, offset int) ([]TenantBilling, int64, error)
+	GetUnpaidPastDue() ([]TenantBilling, error)
 }

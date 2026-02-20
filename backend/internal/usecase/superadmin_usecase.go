@@ -15,6 +15,7 @@ type SuperAdminUsecase struct {
 	featureFlagRepo  domain.FeatureFlagRepository
 	globalConfigRepo domain.GlobalConfigRepository
 	rolePermRepo     domain.RolePermissionRepository
+	superAdminRepo   domain.SuperAdminRepository
 }
 
 func NewSuperAdminUsecase(
@@ -23,6 +24,7 @@ func NewSuperAdminUsecase(
 	ffr domain.FeatureFlagRepository,
 	gcr domain.GlobalConfigRepository,
 	rpr domain.RolePermissionRepository,
+	sar domain.SuperAdminRepository,
 ) *SuperAdminUsecase {
 	return &SuperAdminUsecase{
 		tenantRepo:       tr,
@@ -30,6 +32,7 @@ func NewSuperAdminUsecase(
 		featureFlagRepo:  ffr,
 		globalConfigRepo: gcr,
 		rolePermRepo:     rpr,
+		superAdminRepo:   sar,
 	}
 }
 
@@ -250,4 +253,21 @@ func (u *SuperAdminUsecase) BulkSetRolePermissions(role string, perms []struct {
 		})
 	}
 	return u.rolePermRepo.BulkUpsert(rps)
+}
+
+// ========================
+// Revenue Analysis (MDR Margin + Penalty)
+// ========================
+
+// GetRevenueStats aggregates all revenue numbers across the platform
+func (u *SuperAdminUsecase) GetRevenueStats() (*domain.AppRevenueStats, error) {
+	return u.superAdminRepo.GetRevenueStats()
+}
+
+// GetRevenueByMerchant lists merchants ordered by their contributed revenue
+func (u *SuperAdminUsecase) GetRevenueByMerchant(limit, offset int) ([]domain.AppRevenueMerchant, int64, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+	return u.superAdminRepo.GetRevenueByMerchant(limit, offset)
 }

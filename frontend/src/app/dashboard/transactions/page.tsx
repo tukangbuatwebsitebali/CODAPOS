@@ -246,10 +246,27 @@ export default function TransactionsPage() {
                             </div>
 
                             <div className="border-t border-white/10 pt-4 space-y-2 text-sm">
-                                <div className="flex justify-between text-white/60"><span>Subtotal</span><span>{formatCurrency(selectedTx.subtotal)}</span></div>
+                                <div className="flex justify-between text-white/60"><span>Subtotal (*Gross*)</span><span>{formatCurrency(selectedTx.subtotal)}</span></div>
                                 {selectedTx.discount_amount > 0 && <div className="flex justify-between text-red-400"><span>Diskon</span><span>-{formatCurrency(selectedTx.discount_amount)}</span></div>}
                                 {selectedTx.tax_amount > 0 && <div className="flex justify-between text-white/60"><span>PPN</span><span>{formatCurrency(selectedTx.tax_amount)}</span></div>}
-                                <div className="flex justify-between text-white font-bold text-base pt-2 border-t border-white/5"><span>Total</span><span>{formatCurrency(selectedTx.total_amount)}</span></div>
+
+                                <div className="flex justify-between text-white font-bold text-base pt-2 border-t border-white/5">
+                                    <span>Total Pembayaran (Customer)</span>
+                                    <span>{formatCurrency(selectedTx.total_amount)}</span>
+                                </div>
+
+                                {(selectedTx.total_mdr_merchant || 0) > 0 && (
+                                    <>
+                                        <div className="flex justify-between text-amber-400/80 pt-2 text-xs">
+                                            <span>MDR Payment Gateway ({selectedTx.payment_method})</span>
+                                            <span>-{formatCurrency(selectedTx.total_mdr_merchant || 0)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-[#1DA1F2] font-bold text-base pt-1 border-t border-white/5 mt-1">
+                                            <span>Total Pendapatan Bersih (Net Profit)</span>
+                                            <span>{formatCurrency(selectedTx.net_profit ?? (selectedTx.total_amount - (selectedTx.total_mdr_merchant || 0)))}</span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             <div className="bg-white/5 rounded-xl p-3 text-xs border border-white/10">
