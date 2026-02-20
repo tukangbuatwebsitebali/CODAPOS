@@ -30,8 +30,11 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files (keep secrets in .env.local which is always gitignored)
+.env*.local
+.env.development
+.env.test
+# Allow .env.production to be committed (contains only public vars)
 
 # vercel
 .vercel
