@@ -11,6 +11,14 @@ import { Product, Category, InventoryItem, Outlet } from "@/types";
 
 type Tab = "products" | "categories";
 
+// Helper: resolve image URL — use directly if absolute (Cloudinary), prepend API base if relative
+const resolveImageUrl = (url?: string): string => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url; // Already absolute (Cloudinary)
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8080';
+    return `${base}${url}`;
+};
+
 export default function ProductsPage() {
     const [tab, setTab] = useState<Tab>("products");
     const [products, setProducts] = useState<Product[]>([]);
@@ -189,7 +197,7 @@ export default function ProductsPage() {
             track_stock: product.track_stock,
             image_url: product.image_url || "",
         });
-        setImagePreview(product.image_url ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8080'}${product.image_url}` : "");
+        setImagePreview(resolveImageUrl(product.image_url));
         setImageFile(null);
         setShowModal(true);
     };
@@ -417,7 +425,7 @@ export default function ProductsPage() {
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden flex-shrink-0">
                                                                 {product.image_url ? (
-                                                                    <img src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8080'}${product.image_url}`} alt={product.name} className="w-full h-full object-cover" />
+                                                                    <img src={resolveImageUrl(product.image_url)} alt={product.name} className="w-full h-full object-cover" />
                                                                 ) : (
                                                                     <Package className="w-5 h-5 text-white/20" />
                                                                 )}
@@ -479,7 +487,7 @@ export default function ProductsPage() {
                                     <div key={product.id} className="glass p-4 hover:bg-white/5 transition-all group">
                                         <div className="w-full h-24 rounded-xl bg-white/5 flex items-center justify-center mb-3 overflow-hidden">
                                             {product.image_url ? (
-                                                <img src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8080'}${product.image_url}`} alt={product.name} className="w-full h-full object-cover" />
+                                                <img src={resolveImageUrl(product.image_url)} alt={product.name} className="w-full h-full object-cover" />
                                             ) : (
                                                 <Package className="w-8 h-8 text-white/10" />
                                             )}

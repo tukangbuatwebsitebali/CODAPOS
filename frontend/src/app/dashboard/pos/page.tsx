@@ -11,6 +11,14 @@ import {
     QrCode, ShoppingBag, X, CheckCircle2, Loader2, AlertCircle, Printer,
 } from "lucide-react";
 
+// Helper: resolve image URL — use directly if absolute (Cloudinary), prepend API base if relative
+const resolveImageUrl = (url?: string): string => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8080';
+    return `${base}${url}`;
+};
+
 declare global {
     interface Window {
         snap?: {
@@ -352,7 +360,7 @@ export default function POSPage() {
                             >
                                 <div className="w-full aspect-square rounded-xl bg-gradient-to-br from-white/5 to-white/2 mb-3 flex items-center justify-center overflow-hidden">
                                     {product.image_url ? (
-                                        <img src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8080'}${product.image_url}`} alt={product.name} className="w-full h-full object-cover" />
+                                        <img src={resolveImageUrl(product.image_url)} alt={product.name} className="w-full h-full object-cover" />
                                     ) : (
                                         <ShoppingBag className="w-8 h-8 text-white/10" />
                                     )}
