@@ -401,9 +401,9 @@ export default function ProductsPage() {
                         </div>
                     ) : viewMode === "list" ? (
                         /* Product Table */
-                        <div className="glass p-0 overflow-hidden animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                            <div className="overflow-x-auto">
-                                <table className="table-glass">
+                        <div className="glass p-0 overflow-x-auto rounded-2xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                            <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
+                                <table className="table-glass min-w-[700px]">
                                     <thead>
                                         <tr>
                                             <th>Produk</th>
