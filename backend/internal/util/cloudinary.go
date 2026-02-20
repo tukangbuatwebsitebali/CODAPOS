@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+	"log"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -22,9 +23,14 @@ func CloudinaryUpload(fileHeader *multipart.FileHeader) (string, error) {
 		return saveLocally(fileHeader)
 	}
 
+	// Strip angle brackets (common copy-paste issue from Cloudinary dashboard)
+	cloudURL = strings.ReplaceAll(cloudURL, "<", "")
+	cloudURL = strings.ReplaceAll(cloudURL, ">", "")
+
 	cld, err := cloudinary.NewFromURL(cloudURL)
 	if err != nil {
-		return "", fmt.Errorf("cloudinary init error: %w", err)
+		log.Printf("⚠️ Cloudinary init failed: %v — falling back to local", err)
+		return saveLocally(fileHeader)
 	}
 
 	// Open the file
@@ -34,19 +40,18 @@ func CloudinaryUpload(fileHeader *multipart.FileHeader) (string, error) {
 	}
 	defer file.Close()
 
-	// Generate a unique public ID
-	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
-	publicID := fmt.Sprintf("codapos/%d%s", time.Now().UnixNano(), strings.TrimSuffix(ext, ext))
+	// Generate a unique public ID (no folder param to avoid double nesting)
+	publicID := fmt.Sprintf("codapos/%d", time.Now().UnixNano())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	uploadResult, err := cld.Upload.Upload(ctx, file, uploader.UploadParams{
 		PublicID: publicID,
-		Folder:   "codapos",
 	})
 	if err != nil {
-		return "", fmt.Errorf("cloudinary upload error: %w", err)
+		log.Printf("⚠️ Cloudinary upload failed: %v — falling back to local", err)
+		return saveLocally(fileHeader)
 	}
 
 	return uploadResult.SecureURL, nil
@@ -64,14 +69,12 @@ func saveLocally(fileHeader *multipart.FileHeader) (string, error) {
 
 	savePath := filepath.Join(uploadDir, filename)
 
-	// Open src
 	src, err := fileHeader.Open()
 	if err != nil {
 		return "", err
 	}
 	defer src.Close()
 
-	// Create dst file
 	dst, err := os.Create(savePath)
 	if err != nil {
 		return "", err
