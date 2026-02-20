@@ -17,7 +17,7 @@ import {
 export default function PrinterSettingsPage() {
     const [status, setStatus] = useState<PrinterStatus>({ connected: false, deviceName: null, deviceId: null });
     const [savedDevices, setSavedDevices] = useState<SavedPrinter[]>([]);
-    const [settings, setSettings] = useState<PrinterSettings>({ autoPrint: false, paperSize: "58mm" });
+    const [settings, setSettings] = useState<PrinterSettings>({ autoPrint: false, paperSize: "58mm", receiptType: "Kasir" });
     const [scanning, setScanning] = useState(false);
     const [connecting, setConnecting] = useState(false);
     const [testPrinting, setTestPrinting] = useState(false);
@@ -344,6 +344,23 @@ export default function PrinterSettingsPage() {
                                     <div className="absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-all"
                                         style={{ left: settings.autoPrint ? 22 : 2 }} />
                                 </button>
+                            </div>
+
+                            {/* Tipe Struk / Role */}
+                            <div>
+                                <label className="text-[10px] text-white/40 uppercase tracking-wider block mb-2">Tipe Struk</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {(["Kasir", "Dapur"] as const).map(type => (
+                                        <button key={type} onClick={() => updateSetting("receiptType", type)}
+                                            className={`p-3 rounded-xl border-2 transition-all ${settings.receiptType === type
+                                                ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/10'
+                                                : 'border-white/10 hover:border-white/20'
+                                                }`}>
+                                            <p className={`text-center text-sm font-bold ${settings.receiptType === type ? 'text-blue-400' : 'text-white/40'}`}>{type}</p>
+                                            <p className="text-center text-[10px] text-white/25 mt-1">{type === "Kasir" ? "Total & Harga" : "Hanya Pesanan"}</p>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>

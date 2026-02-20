@@ -642,6 +642,7 @@ func main() {
 	pos.Post("/refund/:id", middleware.PermissionMiddleware(middleware.ActionPOSRefund), posHandler.Refund)
 	pos.Get("/transactions", middleware.PermissionMiddleware(middleware.ActionReadTransactions), posHandler.GetTransactions)
 	pos.Get("/transactions/:id", middleware.PermissionMiddleware(middleware.ActionReadTransactions), posHandler.GetTransaction)
+	pos.Post("/transactions/:id/reprint", middleware.PermissionMiddleware(middleware.ActionReadTransactions), posHandler.ReprintTransaction)
 
 	// Accounting (owner + finance only)
 	accounting := protected.Group("/accounting", middleware.PermissionMiddleware(middleware.ActionManageAccounting))

@@ -8,6 +8,7 @@ export interface ReceiptTenant {
     logo_url?: string;
     address?: string;
     phone?: string;
+    subscription_plan?: string;
 }
 
 export interface ReceiptItem {
@@ -18,6 +19,7 @@ export interface ReceiptItem {
     subtotal: number;
     discount_amount?: number;
     modifiers?: { name: string; price: number }[];
+    notes?: string;
 }
 
 export interface ReceiptPayment {
@@ -67,21 +69,22 @@ function paymentLabel(method: string): string {
 // ═══════════════════════════════════════════════
 // HTML Receipt (for browser print / @media print)
 // ═══════════════════════════════════════════════
-export function generateReceiptHTML(data: ReceiptData, tenant: ReceiptTenant, paper: PaperSize = "58mm"): string {
+export function generateReceiptHTML(data: ReceiptData, tenant: ReceiptTenant, paper: PaperSize = "58mm", receiptType: "Kasir" | "Dapur" = "Kasir"): string {
     const w = PAPER_WIDTH[paper];
     const items = data.items.map(item => {
         const modLines = (item.modifiers || [])
-            .map(m => `<div style="padding-left:12px;font-size:10px;color:#666">+ ${m.name} ${formatCurrency(m.price)}</div>`)
+            .map(m => `<div style="padding-left:12px;font-size:10px;color:#666">+ ${m.name} ${receiptType === "Kasir" ? formatCurrency(m.price) : ""}</div>`)
             .join("");
-        const discount = item.discount_amount && item.discount_amount > 0
+        const discount = item.discount_amount && item.discount_amount > 0 && receiptType === "Kasir"
             ? `<div style="padding-left:12px;font-size:10px;color:#C40000">Diskon -${formatCurrency(item.discount_amount)}</div>` : "";
         return `
             <div style="display:flex;justify-content:space-between;margin:2px 0">
                 <div style="flex:1">
                     <div>${item.product_name}${item.variant_name ? ` (${item.variant_name})` : ""}</div>
-                    <div style="font-size:10px;color:#666">${item.quantity} x ${formatCurrency(item.unit_price)}</div>
+                    <div style="font-size:10px;color:#666">${item.quantity} ${receiptType === "Kasir" ? `x ${formatCurrency(item.unit_price)}` : ""}</div>
+                    ${item.notes ? `<div style="font-size:10px;color:#C40000;font-style:italic">Catatan: ${item.notes}</div>` : ""}
                 </div>
-                <div style="text-align:right;white-space:nowrap">${formatCurrency(item.subtotal)}</div>
+                ${receiptType === "Kasir" ? `<div style="text-align:right;white-space:nowrap">${formatCurrency(item.subtotal)}</div>` : ""}
             </div>
             ${modLines}${discount}`;
     }).join("");
@@ -109,6 +112,8 @@ body { font-family: 'Courier New', monospace; font-size: 12px; width: ${w}; marg
 .total-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
 .row { display: flex; justify-content: space-between; }
 </style></head><body>
+${tenant.subscription_plan?.includes("pro") && tenant.logo_url && receiptType === "Kasir" ? `<div class="center" style="margin-bottom:8px"><img src="${tenant.logo_url.startsWith('http') ? tenant.logo_url : `https://codapos-production.up.railway.app${tenant.logo_url}`}" style="max-height:40px;max-width:100%"/></div>` : ""}
+${receiptType === "Dapur" ? `<div class="center bold" style="font-size:16px;margin-bottom:8px;border:1px solid #000;padding:4px">STRUK DAPUR</div>` : ""}
 <div class="center bold" style="font-size:14px">${tenant.name}</div>
 ${tenant.address ? `<div class="center" style="font-size:10px">${tenant.address}</div>` : ""}
 ${tenant.phone ? `<div class="center" style="font-size:10px">Tel: ${tenant.phone}</div>` : ""}
@@ -119,6 +124,7 @@ ${data.cashier_name ? `<div class="row"><span>Kasir:</span><span>${data.cashier_
 ${data.outlet_name ? `<div class="row"><span>Outlet:</span><span>${data.outlet_name}</span></div>` : ""}
 <div class="divider"></div>
 ${items}
+${receiptType === "Kasir" ? `
 <div class="divider"></div>
 <div class="row"><span>Subtotal</span><span>${formatCurrency(data.subtotal)}</span></div>
 ${data.discount_amount > 0 ? `<div class="row" style="color:#C40000"><span>Diskon</span><span>-${formatCurrency(data.discount_amount)}</span></div>` : ""}
@@ -128,10 +134,13 @@ ${data.tax_amount > 0 ? `<div class="row"><span>PPN 11%</span><span>${formatCurr
 <div class="divider-bold"></div>
 ${payments}
 ${change > 0 ? `<div class="row bold"><span>Kembali</span><span>${formatCurrency(change)}</span></div>` : ""}
+` : ""}
 <div class="divider"></div>
 <div class="center" style="font-size:11px;margin-top:8px">Terima Kasih! 🙏</div>
 <div class="center" style="font-size:10px;color:#666">Selamat Menikmati 😊</div>
 ${data.notes ? `<div class="center" style="font-size:9px;color:#888;margin-top:4px">Catatan: ${data.notes}</div>` : ""}
+<div class="divider-bold"></div>
+<div class="center bold" style="font-size:9px;color:#666;margin:6px 0">POWERED BY CODAPOS.COM</div>
 <div style="margin-top:12px"></div>
 </body></html>`;
 }
@@ -139,7 +148,7 @@ ${data.notes ? `<div class="center" style="font-size:9px;color:#888;margin-top:4
 // ═══════════════════════════════════════════════
 // ESC/POS Binary Commands for Thermal Printers
 // ═══════════════════════════════════════════════
-export function generateESCPOS(data: ReceiptData, tenant: ReceiptTenant, paper: PaperSize = "58mm"): Uint8Array {
+export function generateESCPOS(data: ReceiptData, tenant: ReceiptTenant, paper: PaperSize = "58mm", receiptType: "Kasir" | "Dapur" = "Kasir"): Uint8Array {
     const W = PAPER_CHARS[paper];
     const buf: number[] = [];
     const encoder = new TextEncoder();
@@ -176,6 +185,15 @@ export function generateESCPOS(data: ReceiptData, tenant: ReceiptTenant, paper: 
     // ── Header ──
     push(...INIT);
     push(...CENTER);
+    if (receiptType === "Dapur") {
+        push(...BOLD_ON);
+        push(...DOUBLE_ON);
+        text("STRUK DAPUR");
+        newline();
+        push(...DOUBLE_OFF);
+        push(...BOLD_OFF);
+        line();
+    }
     push(...BOLD_ON);
     push(...DOUBLE_ON);
     text(tenant.name);
@@ -199,44 +217,55 @@ export function generateESCPOS(data: ReceiptData, tenant: ReceiptTenant, paper: 
         const name = item.product_name + (item.variant_name ? ` (${item.variant_name})` : "");
         text(name);
         newline();
-        leftRight(`  ${item.quantity} x ${formatCurrency(item.unit_price)}`, formatCurrency(item.subtotal));
+        if (receiptType === "Kasir") {
+            leftRight(`  ${item.quantity} x ${formatCurrency(item.unit_price)}`, formatCurrency(item.subtotal));
+        } else {
+            text(`  ${item.quantity} x`);
+            newline();
+        }
         for (const mod of item.modifiers || []) {
             text(`  + ${mod.name}`);
             newline();
         }
-        if (item.discount_amount && item.discount_amount > 0) {
+        if (item.notes) {
+            text(`  [!] ${item.notes}`);
+            newline();
+        }
+        if (item.discount_amount && item.discount_amount > 0 && receiptType === "Kasir") {
             leftRight("  Diskon", `-${formatCurrency(item.discount_amount)}`);
         }
     }
     line();
 
     // ── Totals ──
-    leftRight("Subtotal", formatCurrency(data.subtotal));
-    if (data.discount_amount > 0) leftRight("Diskon", `-${formatCurrency(data.discount_amount)}`);
-    if (data.tax_amount > 0) leftRight("PPN 11%", formatCurrency(data.tax_amount));
-    boldLine();
+    if (receiptType === "Kasir") {
+        leftRight("Subtotal", formatCurrency(data.subtotal));
+        if (data.discount_amount > 0) leftRight("Diskon", `-${formatCurrency(data.discount_amount)}`);
+        if (data.tax_amount > 0) leftRight("PPN 11%", formatCurrency(data.tax_amount));
+        boldLine();
 
-    push(...BOLD_ON);
-    push(...DOUBLE_ON);
-    push(...CENTER);
-    text(`TOTAL ${formatCurrency(data.total_amount)}`);
-    newline();
-    push(...DOUBLE_OFF);
-    push(...BOLD_OFF);
-    push(...LEFT);
-    boldLine();
-
-    // ── Payments ──
-    for (const p of data.payments) {
-        leftRight(paymentLabel(p.payment_method), formatCurrency(p.amount));
-    }
-    const change = data.payments.reduce((s, p) => s + p.amount, 0) - data.total_amount;
-    if (change > 0) {
         push(...BOLD_ON);
-        leftRight("Kembali", formatCurrency(change));
+        push(...DOUBLE_ON);
+        push(...CENTER);
+        text(`TOTAL ${formatCurrency(data.total_amount)}`);
+        newline();
+        push(...DOUBLE_OFF);
         push(...BOLD_OFF);
+        push(...LEFT);
+        boldLine();
+
+        // ── Payments ──
+        for (const p of data.payments) {
+            leftRight(paymentLabel(p.payment_method), formatCurrency(p.amount));
+        }
+        const change = data.payments.reduce((s, p) => s + p.amount, 0) - data.total_amount;
+        if (change > 0) {
+            push(...BOLD_ON);
+            leftRight("Kembali", formatCurrency(change));
+            push(...BOLD_OFF);
+        }
+        line();
     }
-    line();
 
     // ── Footer ──
     push(...CENTER);
@@ -245,6 +274,9 @@ export function generateESCPOS(data: ReceiptData, tenant: ReceiptTenant, paper: 
     text("Selamat Menikmati :)");
     newline();
     if (data.notes) { text(`Catatan: ${data.notes}`); newline(); }
+    line();
+    text("POWERED BY CODAPOS.COM");
+    newline();
 
     // Feed & cut
     push(...FEED);
@@ -256,15 +288,26 @@ export function generateESCPOS(data: ReceiptData, tenant: ReceiptTenant, paper: 
 // ═══════════════════════════════════════════════
 // Browser Print Helper
 // ═══════════════════════════════════════════════
-export function printReceiptInBrowser(data: ReceiptData, tenant: ReceiptTenant, paper: PaperSize = "58mm") {
-    const html = generateReceiptHTML(data, tenant, paper);
-    const printWindow = window.open("", "_blank", "width=400,height=600");
-    if (!printWindow) return;
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-    }, 300);
+export function printReceiptInBrowser(data: ReceiptData, tenant: ReceiptTenant, paper: PaperSize = "58mm", receiptType: "Kasir" | "Dapur" = "Kasir") {
+    const html = generateReceiptHTML(data, tenant, paper, receiptType);
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document;
+    if (doc) {
+        doc.open();
+        doc.write(html);
+        doc.close();
+
+        setTimeout(() => {
+            iframe.contentWindow?.focus();
+            iframe.contentWindow?.print();
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 3000); // cleanup after 3 seconds
+        }, 500); // give time for css/layout to render
+    } else {
+        document.body.removeChild(iframe);
+    }
 }

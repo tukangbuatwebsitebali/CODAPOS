@@ -73,12 +73,14 @@ const SETTINGS_KEY = "dewata_printer_settings";
 export interface PrinterSettings {
     autoPrint: boolean;
     paperSize: "58mm" | "80mm";
+    receiptType: "Kasir" | "Dapur";
     defaultPrinterId?: string;
 }
 
 const DEFAULT_SETTINGS: PrinterSettings = {
     autoPrint: false,
     paperSize: "58mm",
+    receiptType: "Kasir",
 };
 
 class BluetoothPrinterService {

@@ -125,6 +125,7 @@ export const posAPI = {
         return api.get(`/pos/transactions?${params.toString()}`);
     },
     getTransaction: (id: string) => api.get(`/pos/transactions/${id}`),
+    reprintTransaction: (id: string) => api.post(`/pos/transactions/${id}/reprint`),
 };
 
 // ======= ACCOUNTING =======

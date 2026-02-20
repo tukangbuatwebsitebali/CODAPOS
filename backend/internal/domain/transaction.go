@@ -24,6 +24,8 @@ type Transaction struct {
 	Notes                 string     `json:"notes,omitempty"`
 	RefundReason          string     `json:"refund_reason,omitempty"`
 	OriginalTransactionID *uuid.UUID `json:"original_transaction_id,omitempty" gorm:"type:uuid"`
+	ReprintCount          int        `json:"reprint_count" gorm:"default:0"`
+	LastReprintAt         *time.Time `json:"last_reprint_at,omitempty"`
 
 	// Relations
 	Outlet              *Outlet              `json:"outlet,omitempty" gorm:"foreignKey:OutletID"`
@@ -66,6 +68,7 @@ type TransactionItem struct {
 	TaxAmount      float64    `json:"tax_amount" gorm:"type:decimal(15,2);default:0"`
 	Subtotal       float64    `json:"subtotal" gorm:"type:decimal(15,2);not null"`
 	Modifiers      JSON       `json:"modifiers" gorm:"type:jsonb;default:'[]'"`
+	Notes          string     `json:"notes,omitempty"`
 	CreatedAt      time.Time  `json:"created_at"`
 }
 
@@ -122,6 +125,7 @@ type CheckoutItemRequest struct {
 	VariantID *uuid.UUID        `json:"variant_id,omitempty"`
 	Quantity  float64           `json:"quantity" validate:"required,gt=0"`
 	Modifiers []ModifierRequest `json:"modifiers,omitempty"`
+	Notes     string            `json:"notes,omitempty"`
 }
 
 type ModifierRequest struct {

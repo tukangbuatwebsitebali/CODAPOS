@@ -57,6 +57,7 @@ interface CartState {
     addItem: (product: Product, variant?: ProductVariant, modifiers?: { name: string; price: number }[]) => void;
     removeItem: (index: number) => void;
     updateQuantity: (index: number, quantity: number) => void;
+    updateNote: (index: number, notes: string) => void;
     clearCart: () => void;
     setOutlet: (outletId: string) => void;
     getSubtotal: () => number;
@@ -100,6 +101,12 @@ export const useCartStore = create<CartState>((set, get) => ({
         }
         const newItems = [...get().items];
         newItems[index].quantity = quantity;
+        set({ items: newItems });
+    },
+
+    updateNote: (index, notes) => {
+        const newItems = [...get().items];
+        newItems[index].notes = notes;
         set({ items: newItems });
     },
 

@@ -80,6 +80,7 @@ func (u *POSUsecase) Checkout(tenantID, cashierID uuid.UUID, req domain.Checkout
 			TaxAmount:   taxAmount,
 			Subtotal:    itemSubtotal,
 			Modifiers:   domain.JSON(modJSON),
+			Notes:       itemReq.Notes,
 		})
 
 		subtotal += itemSubtotal
@@ -263,4 +264,22 @@ func (u *POSUsecase) GetTransactions(tenantID uuid.UUID, outletID *uuid.UUID, pa
 // GetTransaction returns a single transaction
 func (u *POSUsecase) GetTransaction(id uuid.UUID) (*domain.Transaction, error) {
 	return u.transactionRepo.FindByID(id)
+}
+
+// IncrementReprint processes a receipt reprint logging
+func (u *POSUsecase) IncrementReprint(id uuid.UUID) (*domain.Transaction, error) {
+	tx, err := u.transactionRepo.FindByID(id)
+	if err != nil {
+		return nil, errors.New("transaction not found")
+	}
+
+	tx.ReprintCount += 1
+	now := time.Now()
+	tx.LastReprintAt = &now
+
+	if err := u.transactionRepo.Update(tx); err != nil {
+		return nil, fmt.Errorf("failed to update transaction reprint: %w", err)
+	}
+
+	return tx, nil
 }

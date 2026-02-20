@@ -187,6 +187,8 @@ export interface Transaction {
     outlet?: Outlet;
     cashier?: User;
     customer?: Customer;
+    reprint_count?: number;
+    last_reprint_at?: string;
     created_at: string;
 }
 
@@ -203,6 +205,7 @@ export interface TransactionItem {
     tax_amount: number;
     subtotal: number;
     modifiers?: { name: string; price: number }[];
+    notes?: string;
 }
 
 export interface TransactionPayment {
@@ -228,6 +231,7 @@ export interface CheckoutItem {
     variant_id?: string;
     quantity: number;
     modifiers?: { name: string; price: number }[];
+    notes?: string;
 }
 
 export interface PaymentInput {
@@ -306,6 +310,7 @@ export interface CartItem {
     variant?: ProductVariant;
     quantity: number;
     modifiers: { name: string; price: number }[];
+    notes?: string;
     unitPrice: number;
 }
 

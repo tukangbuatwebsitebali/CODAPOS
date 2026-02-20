@@ -35,7 +35,7 @@ declare global {
 const categories = ["Semua", "Makanan", "Minuman", "Snack"];
 
 export default function POSPage() {
-    const { items, addItem, removeItem, updateQuantity, clearCart, getSubtotal, getTax, getTotal, getItemCount } = useCartStore();
+    const { items, addItem, removeItem, updateQuantity, updateNote, clearCart, getSubtotal, getTax, getTotal, getItemCount } = useCartStore();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -86,6 +86,7 @@ export default function POSPage() {
                         address: tenant.address,
                         phone: tenant.phone,
                         logo_url: tenant.logo_url,
+                        subscription_plan: tenant.subscription_plan,
                     };
                 }
 
@@ -148,10 +149,10 @@ export default function POSPage() {
             const status = printerService.getStatus();
 
             if (status.connected) {
-                const escpos = generateESCPOS(receiptData, tenantRef.current, settings.paperSize);
+                const escpos = generateESCPOS(receiptData, tenantRef.current, settings.paperSize, settings.receiptType);
                 await printerService.print(escpos);
             } else {
-                printReceiptInBrowser(receiptData, tenantRef.current, settings.paperSize);
+                printReceiptInBrowser(receiptData, tenantRef.current, settings.paperSize, settings.receiptType);
             }
         } catch {
             // Silently fail — receipt is optional
@@ -228,9 +229,10 @@ export default function POSPage() {
                                 outlet_id: defaultOutletId,
                                 items: items.map((item) => ({
                                     product_id: item.product.id,
-                                    variant_id: item.variant?.id,
+                                    variety_id: item.variant?.id,
                                     quantity: item.quantity,
                                     modifiers: item.modifiers,
+                                    notes: item.notes,
                                 })),
                                 payments: [{
                                     payment_method: methodLower,
@@ -283,6 +285,7 @@ export default function POSPage() {
                     variant_id: item.variant?.id,
                     quantity: item.quantity,
                     modifiers: item.modifiers,
+                    notes: item.notes,
                 })),
                 payments: [{
                     payment_method: methodLower,
@@ -429,34 +432,47 @@ export default function POSPage() {
                         </div>
                     ) : (
                         items.map((item, i) => (
-                            <div key={i} className="glass-subtle p-3 flex gap-3">
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-white truncate">{item.product.name}</p>
-                                    <p className="text-xs text-white/30 mt-0.5">{formatCurrency(item.unitPrice)} / item</p>
+                            <div key={i} className="glass-subtle p-3 flex flex-col gap-2">
+                                <div className="flex gap-3">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-white truncate">{item.product.name}</p>
+                                        <p className="text-xs text-white/30 mt-0.5">{formatCurrency(item.unitPrice)} / item</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => updateQuantity(i, item.quantity - 1)}
+                                            className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 transition"
+                                        >
+                                            <Minus className="w-3 h-3" />
+                                        </button>
+                                        <span className="text-sm font-semibold text-white w-6 text-center">{item.quantity}</span>
+                                        <button
+                                            onClick={() => updateQuantity(i, item.quantity + 1)}
+                                            className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 transition"
+                                        >
+                                            <Plus className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-semibold text-white">{formatCurrency(item.unitPrice * item.quantity)}</p>
+                                        <button
+                                            onClick={() => removeItem(i)}
+                                            className="text-red-400/50 hover:text-red-400 mt-1"
+                                        >
+                                            <X className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => updateQuantity(i, item.quantity - 1)}
-                                        className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 transition"
-                                    >
-                                        <Minus className="w-3 h-3" />
-                                    </button>
-                                    <span className="text-sm font-semibold text-white w-6 text-center">{item.quantity}</span>
-                                    <button
-                                        onClick={() => updateQuantity(i, item.quantity + 1)}
-                                        className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 transition"
-                                    >
-                                        <Plus className="w-3 h-3" />
-                                    </button>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-sm font-semibold text-white">{formatCurrency(item.unitPrice * item.quantity)}</p>
-                                    <button
-                                        onClick={() => removeItem(i)}
-                                        className="text-red-400/50 hover:text-red-400 mt-1"
-                                    >
-                                        <X className="w-3.5 h-3.5" />
-                                    </button>
+                                <div className="mt-1">
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Tambahkan catatan (opsional)..."
+                                            value={item.notes || ""}
+                                            onChange={(e) => updateNote(i, e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-colors"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         ))

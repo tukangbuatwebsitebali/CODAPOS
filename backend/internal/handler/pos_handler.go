@@ -105,3 +105,19 @@ func (h *POSHandler) GetTransaction(c *fiber.Ctx) error {
 
 	return response.Success(c, tx, "")
 }
+
+// ReprintTransaction increments the reprint counter for a transaction
+func (h *POSHandler) ReprintTransaction(c *fiber.Ctx) error {
+	idStr := c.Params("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return response.BadRequest(c, "invalid transaction ID")
+	}
+
+	tx, err := h.posUsecase.IncrementReprint(id)
+	if err != nil {
+		return response.NotFound(c, "transaction not found")
+	}
+
+	return response.Success(c, tx, "reprint logged successfully")
+}
