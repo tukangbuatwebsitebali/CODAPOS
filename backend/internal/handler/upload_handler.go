@@ -70,8 +70,11 @@ func (h *UploadHandler) Upload(c *fiber.Ctx) error {
 		})
 	}
 
-	// Build public URL
-	baseURL := c.BaseURL()
+	// Build public URL — prefer BASE_URL env var (for Railway/production)
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = c.BaseURL()
+	}
 	publicURL := fmt.Sprintf("%s/uploads/%s", baseURL, filename)
 
 	return c.JSON(fiber.Map{

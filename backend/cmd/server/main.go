@@ -60,6 +60,7 @@ func main() {
 	seedGlobalConfigs(db)
 	seedMidtransConfigs(db)
 	seedDefaultRolePermissions(db)
+	fixImageURLs(db)
 
 	// Initialize repositories
 	tenantRepo := repository.NewTenantRepository(db)
@@ -618,8 +619,12 @@ func main() {
 			return c.Status(500).JSON(fiber.Map{"success": false, "error": "Failed to save image"})
 		}
 
-		// Return full URL
-		imageURL := fmt.Sprintf("/uploads/%s", filename)
+		// Return full URL — use BASE_URL env var for Railway production
+		baseURL := os.Getenv("BASE_URL")
+		if baseURL == "" {
+			baseURL = c.BaseURL()
+		}
+		imageURL := fmt.Sprintf("%s/uploads/%s", baseURL, filename)
 		return c.JSON(fiber.Map{"success": true, "data": fiber.Map{"image_url": imageURL}})
 	})
 
@@ -1130,4 +1135,41 @@ func seedPriceReferences(db *gorm.DB) {
 		db.Table("price_references").Create(ref)
 	}
 	log.Println("✅ Price references seeded (~100 products)")
+}
+
+func fixImageURLs(db *gorm.DB) {
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		return // only fix on production where BASE_URL is set
+	}
+
+	// Fix products with relative image_url (starts with /uploads/)
+	result := db.Exec(
+		"UPDATE products SET image_url = ? || image_url WHERE image_url LIKE '/uploads/%'",
+		baseURL,
+	)
+	if result.RowsAffected > 0 {
+		log.Printf("✅ Fixed %d product image URLs (relative → absolute)", result.RowsAffected)
+	}
+
+	// Fix products with http://localhost image_url
+	result = db.Exec(
+		"UPDATE products SET image_url = ? || SUBSTRING(image_url FROM POSITION('/uploads/' IN image_url)) WHERE image_url LIKE '%localhost%/uploads/%'",
+		baseURL,
+	)
+	if result.RowsAffected > 0 {
+		log.Printf("✅ Fixed %d product image URLs (localhost → production)", result.RowsAffected)
+	}
+
+	// Fix products with http:// Railway URL (should be https://)
+	result = db.Exec(
+		"UPDATE products SET image_url = REPLACE(image_url, 'http://', 'https://') WHERE image_url LIKE 'http://codapos-production%'",
+	)
+	if result.RowsAffected > 0 {
+		log.Printf("✅ Fixed %d product image URLs (http → https)", result.RowsAffected)
+	}
+
+	// Fix tenants logo_url too
+	db.Exec("UPDATE tenants SET logo_url = ? || logo_url WHERE logo_url LIKE '/uploads/%'", baseURL)
+	db.Exec("UPDATE tenants SET logo_url = REPLACE(logo_url, 'http://', 'https://') WHERE logo_url LIKE 'http://codapos-production%'")
 }
