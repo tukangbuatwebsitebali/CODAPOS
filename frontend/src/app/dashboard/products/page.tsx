@@ -5,8 +5,9 @@ import {
     Search, Plus, Edit3, Trash2, Package, Filter,
     Grid2X2, List, X, Loader2, AlertCircle, Tag,
     ImagePlus, Upload, ArrowRight, CheckSquare, Square,
+    Sparkles, TrendingUp,
 } from "lucide-react";
-import { productAPI, categoryAPI, inventoryAPI, outletAPI } from "@/lib/api";
+import { productAPI, categoryAPI, inventoryAPI, outletAPI, businessUnitAPI, aiAPI } from "@/lib/api";
 import { Product, Category, InventoryItem, Outlet } from "@/types";
 
 type Tab = "products" | "categories";
@@ -31,6 +32,15 @@ export default function ProductsPage() {
     const [stockMap, setStockMap] = useState<Record<string, number>>({});
     const [outlets, setOutlets] = useState<Outlet[]>([]);
     const [selectedOutlet, setSelectedOutlet] = useState<string>("");
+
+    // Business units & AI price suggestion
+    const [businessUnits, setBusinessUnits] = useState<{ name: string; label: string }[]>([]);
+    const [priceSuggestion, setPriceSuggestion] = useState<{
+        suggested_price: number; price_range: { low: number; high: number };
+        matched_name: string; confidence: number;
+    } | null>(null);
+    const [loadingPrice, setLoadingPrice] = useState(false);
+    const priceDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
     // Scroll hint tooltip
     const [showScrollHint, setShowScrollHint] = useState(false);
@@ -67,6 +77,8 @@ export default function ProductsPage() {
         is_active: true,
         track_stock: true,
         image_url: "",
+        unit: "pcs",
+        stock_quantity: 0,
     });
     const [imagePreview, setImagePreview] = useState<string>("");
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -142,6 +154,42 @@ export default function ProductsPage() {
         }
     }, []);
 
+    // Load business units from merchant type
+    useEffect(() => {
+        // Try to get merchant type slug from user profile
+        import("@/lib/api").then(({ userAPI }) => {
+            userAPI.getProfile().then((res: { data: { data: { tenant?: { merchant_type?: { slug: string } } } } }) => {
+                const slug = res.data?.data?.tenant?.merchant_type?.slug;
+                if (slug) {
+                    businessUnitAPI.getByMerchantType(slug).then(buRes => {
+                        setBusinessUnits(buRes.data.data || []);
+                    }).catch(() => { });
+                } else {
+                    businessUnitAPI.getAll().then(buRes => {
+                        // deduplicate by name
+                        const seen = new Set<string>();
+                        const unique = (buRes.data.data || []).filter((u: { name: string }) => {
+                            if (seen.has(u.name)) return false;
+                            seen.add(u.name);
+                            return true;
+                        });
+                        setBusinessUnits(unique);
+                    }).catch(() => { });
+                }
+            }).catch(() => {
+                businessUnitAPI.getAll().then(buRes => {
+                    const seen = new Set<string>();
+                    const unique = (buRes.data.data || []).filter((u: { name: string }) => {
+                        if (seen.has(u.name)) return false;
+                        seen.add(u.name);
+                        return true;
+                    });
+                    setBusinessUnits(unique);
+                }).catch(() => { });
+            });
+        });
+    }, []);
+
     useEffect(() => {
         fetchProducts();
         fetchCategories();
@@ -185,16 +233,32 @@ export default function ProductsPage() {
     }, [search, fetchProducts]);
 
     // ==================== PRODUCT HANDLERS ====================
+    // Debounced AI price suggestion
+    const fetchPriceSuggestion = useCallback((name: string) => {
+        if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
+        if (name.length < 3) { setPriceSuggestion(null); return; }
+        priceDebounceRef.current = setTimeout(async () => {
+            setLoadingPrice(true);
+            try {
+                const res = await aiAPI.suggestPrice(name);
+                if (res.data.data) setPriceSuggestion(res.data.data);
+                else setPriceSuggestion(null);
+            } catch { setPriceSuggestion(null); }
+            finally { setLoadingPrice(false); }
+        }, 600);
+    }, []);
+
     const resetForm = () => {
         setForm({
             name: "", sku: "", barcode: "", description: "",
             base_price: 0, cost_price: 0, tax_rate: 11,
             category_id: "", is_active: true, track_stock: true,
-            image_url: "",
+            image_url: "", unit: "pcs", stock_quantity: 0,
         });
         setEditingProduct(null);
         setImagePreview("");
         setImageFile(null);
+        setPriceSuggestion(null);
     };
 
     const openCreateModal = () => {
@@ -216,7 +280,10 @@ export default function ProductsPage() {
             is_active: product.is_active,
             track_stock: product.track_stock,
             image_url: product.image_url || "",
+            unit: product.unit || "pcs",
+            stock_quantity: stockMap[product.id] ?? 0,
         });
+        setPriceSuggestion(null);
         setImagePreview(resolveImageUrl(product.image_url));
         setImageFile(null);
         setShowModal(true);
@@ -240,10 +307,23 @@ export default function ProductsPage() {
                 ...form,
                 image_url: imageUrl,
                 category_id: form.category_id || undefined,
+                stock_quantity: form.track_stock ? form.stock_quantity : undefined,
             };
 
             if (editingProduct) {
                 await productAPI.update(editingProduct.id, payload);
+                // Update stock if changed
+                if (form.track_stock && selectedOutlet) {
+                    const currentStock = stockMap[editingProduct.id] ?? 0;
+                    if (form.stock_quantity !== currentStock) {
+                        await inventoryAPI.setStock({
+                            outlet_id: selectedOutlet,
+                            product_id: editingProduct.id,
+                            quantity: form.stock_quantity,
+                            notes: "Update stok dari form produk",
+                        });
+                    }
+                }
             } else {
                 await productAPI.create(payload);
             }
@@ -752,7 +832,10 @@ export default function ProductsPage() {
                                     className="input-glass"
                                     placeholder="Nama produk"
                                     value={form.name}
-                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                    onChange={(e) => {
+                                        setForm({ ...form, name: e.target.value });
+                                        fetchPriceSuggestion(e.target.value);
+                                    }}
                                     required
                                 />
                             </div>
@@ -796,6 +879,75 @@ export default function ProductsPage() {
                                     <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Pajak (%)</label>
                                     <input type="number" className="input-glass" placeholder="11" value={form.tax_rate} onChange={(e) => setForm({ ...form, tax_rate: Number(e.target.value) })} min={0} />
                                 </div>
+                            </div>
+
+                            {/* AI Price Suggestion */}
+                            {(priceSuggestion || loadingPrice) && (
+                                <div className="flex items-center gap-2 p-3 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20">
+                                    <Sparkles className="w-4 h-4 text-purple-400 shrink-0" />
+                                    {loadingPrice ? (
+                                        <span className="text-xs text-purple-300">Mencari harga pasar...</span>
+                                    ) : priceSuggestion && (
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className="text-xs text-purple-300">AI: {priceSuggestion.matched_name}</span>
+                                                <span className="text-xs font-bold text-white">Rp {priceSuggestion.suggested_price.toLocaleString('id-ID')}</span>
+                                                <span className="text-[10px] text-white/30">(Rp {priceSuggestion.price_range.low.toLocaleString('id-ID')} – {priceSuggestion.price_range.high.toLocaleString('id-ID')})</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setForm({ ...form, base_price: priceSuggestion.suggested_price })}
+                                                className="text-[10px] text-purple-400 hover:text-purple-300 mt-0.5 flex items-center gap-1"
+                                            >
+                                                <TrendingUp className="w-3 h-3" /> Pakai harga ini
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Unit & Stock */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Satuan</label>
+                                    <select
+                                        className="input-glass"
+                                        value={form.unit}
+                                        onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                                    >
+                                        {businessUnits.length > 0 ? (
+                                            businessUnits.map((bu) => (
+                                                <option key={bu.name} value={bu.name}>{bu.label || bu.name}</option>
+                                            ))
+                                        ) : (
+                                            <>
+                                                <option value="pcs">Pieces</option>
+                                                <option value="kg">Kilogram</option>
+                                                <option value="gram">Gram</option>
+                                                <option value="liter">Liter</option>
+                                                <option value="pack">Pack</option>
+                                                <option value="dus">Dus</option>
+                                                <option value="lusin">Lusin (12)</option>
+                                                <option value="set">Set</option>
+                                            </>
+                                        )}
+                                    </select>
+                                </div>
+                                {form.track_stock && (
+                                    <div>
+                                        <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">
+                                            {editingProduct ? "Stok Saat Ini" : "Stok Awal"}
+                                        </label>
+                                        <input
+                                            type="number"
+                                            className="input-glass"
+                                            placeholder="0"
+                                            value={form.stock_quantity || ""}
+                                            onChange={(e) => setForm({ ...form, stock_quantity: Number(e.target.value) })}
+                                            min={0}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex gap-4 pt-2">

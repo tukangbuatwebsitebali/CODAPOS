@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { deliveryAPI } from "@/lib/api";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { deliveryAPI, aiAPI } from "@/lib/api";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/store";
 import { usePermission } from "@/hooks/usePermission";
@@ -12,7 +12,7 @@ import {
     LayoutDashboard, ShoppingCart, Package, Warehouse,
     Receipt, Store, BookOpen, FileText, BarChart3,
     Building2, Settings, LogOut, ChevronLeft, Menu, Crown, Shield, Users, Brain, Truck, Palette, Printer, Globe,
-    X, MoreHorizontal, User,
+    X, MoreHorizontal, User, Bell, AlertTriangle, TrendingDown,
 } from "lucide-react";
 
 
@@ -60,6 +60,119 @@ const bottomNavItems = [
     { label: "Produk", icon: Package, href: "/dashboard/products" },
     { label: "Transaksi", icon: Receipt, href: "/dashboard/transactions" },
 ];
+// ======= STOCK ALERT BELL COMPONENT =======
+interface StockAlertItem {
+    product_id: string;
+    product_name: string;
+    product_unit: string;
+    current_stock: number;
+    daily_avg_sales: number;
+    weekly_trend: number;
+    predicted_days_left: number;
+    suggested_restock: number;
+    severity: string;
+    message: string;
+}
+
+function StockAlertBell() {
+    const [alerts, setAlerts] = useState<StockAlertItem[]>([]);
+    const [open, setOpen] = useState(false);
+    const bellRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const fetch = async () => {
+            try {
+                const res = await aiAPI.getStockAlerts();
+                setAlerts(res.data.data || []);
+            } catch { /* ignore */ }
+        };
+        fetch();
+        const interval = setInterval(fetch, 300000); // every 5 min
+        return () => clearInterval(interval);
+    }, []);
+
+    // Close on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (bellRef.current && !bellRef.current.contains(e.target as Node)) setOpen(false);
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    const criticalCount = alerts.filter(a => a.severity === "critical").length;
+    const totalCount = alerts.length;
+
+    return (
+        <div className="relative" ref={bellRef}>
+            <button
+                onClick={() => setOpen(!open)}
+                className="relative w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all"
+            >
+                <Bell className="w-4.5 h-4.5" />
+                {totalCount > 0 && (
+                    <span className={`absolute -top-1 -right-1 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center text-white ${criticalCount > 0 ? "bg-red-500 animate-pulse" : "bg-amber-500"}`}>
+                        {totalCount}
+                    </span>
+                )}
+            </button>
+
+            {open && (
+                <div className="absolute right-0 top-12 w-80 sm:w-96 max-h-[70vh] overflow-y-auto rounded-2xl bg-[#12121e]/98 border border-white/10 backdrop-blur-xl shadow-2xl z-50 animate-fade-in">
+                    <div className="sticky top-0 bg-[#12121e] px-4 py-3 border-b border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4 text-amber-400" />
+                            <span className="text-sm font-semibold text-white">Peringatan Stok</span>
+                        </div>
+                        <span className="text-xs text-white/30">{totalCount} peringatan</span>
+                    </div>
+
+                    {totalCount === 0 ? (
+                        <div className="p-8 text-center">
+                            <Package className="w-8 h-8 text-white/10 mx-auto mb-2" />
+                            <p className="text-sm text-white/30">Semua stok aman 👍</p>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-white/5">
+                            {alerts.map((alert) => (
+                                <div key={alert.product_id} className="px-4 py-3 hover:bg-white/3 transition-colors">
+                                    <div className="flex items-start gap-3">
+                                        <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${alert.severity === "critical" ? "bg-red-500" : "bg-amber-500"}`} />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-medium text-white truncate">{alert.product_name}</span>
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${alert.severity === "critical" ? "bg-red-500/20 text-red-400" : "bg-amber-500/20 text-amber-400"}`}>
+                                                    {alert.severity === "critical" ? "KRITIS" : "RENDAH"}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-3 mt-1">
+                                                <span className="text-xs text-white/40">
+                                                    Stok: <span className="text-white/70 font-medium">{alert.current_stock} {alert.product_unit}</span>
+                                                </span>
+                                                <span className="text-xs text-white/40">
+                                                    ~{Math.round(alert.predicted_days_left)} hari
+                                                </span>
+                                                {alert.weekly_trend !== 0 && (
+                                                    <span className={`text-[10px] flex items-center gap-0.5 ${alert.weekly_trend > 0 ? "text-green-400" : "text-red-400"}`}>
+                                                        <TrendingDown className={`w-3 h-3 ${alert.weekly_trend > 0 ? "rotate-180" : ""}`} />
+                                                        {Math.abs(alert.weekly_trend).toFixed(0)}%
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-[11px] text-white/25 mt-1">
+                                                Rekomendasi: tambah {alert.suggested_restock} {alert.product_unit}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -295,8 +408,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4" data-tour="tour-topbar">
-                            <div className="text-right">
+                        <div className="flex items-center gap-2 sm:gap-4" data-tour="tour-topbar">
+                            {/* Stock Alert Bell */}
+                            <StockAlertBell />
+                            <div className="text-right hidden sm:block">
                                 <p className="text-xs text-white/30">{user?.tenant?.name || "CODAPOS"}</p>
                             </div>
                             {/* Mobile: user avatar in header */}
