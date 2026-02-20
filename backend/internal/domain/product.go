@@ -39,6 +39,10 @@ type Product struct {
 	TrackStock  bool       `json:"track_stock" gorm:"default:true"`
 	IsLocked    bool       `json:"is_locked" gorm:"default:false"`
 	SortOrder   int        `json:"sort_order" gorm:"default:0"`
+	Unit        string     `json:"unit" gorm:"size:50;default:'pcs'"`
+
+	// Virtual field — not stored in products table, used for create/update convenience
+	StockQuantity *float64 `json:"stock_quantity,omitempty" gorm:"-"`
 
 	// Relations
 	Category       *Category        `json:"category,omitempty" gorm:"foreignKey:CategoryID"`

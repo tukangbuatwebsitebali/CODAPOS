@@ -283,3 +283,16 @@ export const uploadAPI = {
 export const websiteAPI = {
     getConfig: () => api.get('/public/website-config'),
 };
+
+// ======= BUSINESS UNITS (Public) =======
+export const businessUnitAPI = {
+    getAll: () => api.get('/business-units'),
+    getByTypeSlug: (slug: string) => api.get(`/business-units?type_slug=${encodeURIComponent(slug)}`),
+};
+
+// ======= AI (Protected) =======
+export const aiAPI = {
+    getStockAlerts: () => api.get('/ai/stock-alerts'),
+    suggestPrice: (productName: string, category?: string) =>
+        api.post('/ai/price-suggest', { product_name: productName, category: category || '' }),
+};

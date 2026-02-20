@@ -128,6 +128,8 @@ export interface Product {
     track_stock: boolean;
     is_locked: boolean;
     sort_order: number;
+    unit: string;
+    stock_quantity?: number;
     category?: Category;
     variants?: ProductVariant[];
     modifier_groups?: ModifierGroup[];
@@ -465,5 +467,40 @@ export interface UpdateCustomerRequest {
     phone?: string;
     email?: string;
     notes?: string;
+}
+
+// =============================================
+// AI FEATURES
+// =============================================
+
+export interface StockAlert {
+    product_id: string;
+    product_name: string;
+    product_sku: string;
+    product_unit: string;
+    current_stock: number;
+    daily_avg_sales: number;
+    weekly_trend: number;
+    predicted_days_left: number;
+    suggested_restock: number;
+    severity: 'warning' | 'critical' | 'ok';
+    message: string;
+}
+
+export interface PriceSuggestion {
+    suggested_price: number;
+    price_range: { low: number; high: number };
+    source: string;
+    confidence: number;
+    matched_name: string;
+}
+
+export interface BusinessUnit {
+    id: string;
+    merchant_type_id: string;
+    name: string;
+    label: string;
+    sort_order: number;
+    merchant_type?: MerchantType;
 }
 

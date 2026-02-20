@@ -34,6 +34,7 @@ const allMenuItems: MenuItem[] = [
     { label: "Outlet", icon: Store, href: "/dashboard/outlets", permission: "manage_outlets", tourId: "tour-outlets" },
     { label: "Pelanggan", icon: Users, href: "/dashboard/customers", permission: "manage_customers" },
     { label: "AI Forecast", icon: Brain, href: "/dashboard/forecast", permission: "manage_settings" },
+    { label: "AI Stock Alerts", icon: Brain, href: "/dashboard/stock-alerts", permission: "manage_products" },
     { label: "MyKurir", icon: Truck, href: "/dashboard/delivery", permission: "manage_settings" },
     { label: "Template Toko", icon: Palette, href: "/dashboard/storefront", permission: "manage_settings" },
     { divider: true, label: "Akuntansi", permission: "manage_accounting" },

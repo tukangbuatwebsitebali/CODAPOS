@@ -77,6 +77,12 @@ func AutoMigrate(db *gorm.DB) error {
 
 		// RBAC
 		&domain.RolePermission{},
+
+		// Business Units (units per merchant type)
+		&domain.BusinessUnit{},
+
+		// AI Price References
+		&domain.PriceReference{},
 	)
 
 	if err != nil {

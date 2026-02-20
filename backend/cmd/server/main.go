@@ -55,6 +55,8 @@ func main() {
 	// Seed default subscription plans + merchant types
 	seedSubscriptionPlans(db)
 	seedMerchantTypes(db)
+	seedBusinessUnits(db)
+	seedPriceReferences(db)
 	seedGlobalConfigs(db)
 	seedMidtransConfigs(db)
 	seedDefaultRolePermissions(db)
@@ -82,6 +84,7 @@ func main() {
 	deliveryRepo := repository.NewDeliveryRepository(db)
 	rolePermRepo := repository.NewRolePermissionRepository(db)
 	chatRepo := repository.NewChatRepository(db)
+	businessUnitRepo := repository.NewBusinessUnitRepository(db)
 
 	// Initialize usecases
 	authUsecase := usecase.NewAuthUsecase(tenantRepo, userRepo, merchantTypeRepo, featureFlagRepo, cfg)
@@ -121,6 +124,8 @@ func main() {
 	// Phase 7 handlers
 	deliveryHandler := handler.NewDeliveryHandler(deliveryUsecase)
 	chatHandler := handler.NewChatHandler(chatRepo, deliveryRepo)
+	// AI handler
+	aiHandler := handler.NewAIHandler(db)
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
@@ -169,6 +174,23 @@ func main() {
 			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 		}
 		return c.JSON(fiber.Map{"success": true, "data": types})
+	})
+
+	// Public: business units (for product form)
+	api.Get("/business-units", func(c *fiber.Ctx) error {
+		slug := c.Query("type_slug")
+		if slug != "" {
+			units, err := businessUnitRepo.FindByMerchantTypeSlug(slug)
+			if err != nil {
+				return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+			}
+			return c.JSON(fiber.Map{"success": true, "data": units})
+		}
+		units, err := businessUnitRepo.FindAll()
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.JSON(fiber.Map{"success": true, "data": units})
 	})
 
 	// Public: Midtrans client config (no server key)
@@ -464,6 +486,11 @@ func main() {
 	// Phase 6: AI Forecast
 	forecastHandler.RegisterRoutes(protected)
 
+	// AI: Stock alerts & price suggestion
+	ai := protected.Group("/ai")
+	ai.Get("/stock-alerts", aiHandler.GetStockAlerts)
+	ai.Post("/price-suggest", aiHandler.SuggestPrice)
+
 	// Phase 7: MyKurir (Delivery)
 	// Set active-count handler BEFORE RegisterRoutes so it's registered before :id wildcard
 	deliveryHandler.SetActiveCountHandler(func(c *fiber.Ctx) error {
@@ -716,21 +743,46 @@ func seedSubscriptionPlans(db *gorm.DB) {
 func seedMerchantTypes(db *gorm.DB) {
 	var count int64
 	db.Table("merchant_types").Count(&count)
-	if count > 0 {
+	if count >= 24 {
 		return
 	}
 
 	types := []map[string]interface{}{
-		{"name": "Restaurant / Cafe", "slug": "restaurant", "icon": "🍽️", "is_active": true},
-		{"name": "Grosir Sembako", "slug": "grosir-sembako", "icon": "🏪", "is_active": true},
-		{"name": "Pengrajin / UMKM", "slug": "pengrajin", "icon": "🎨", "is_active": true},
-		{"name": "Lainnya", "slug": "lainnya", "icon": "📦", "is_active": true},
+		{"name": "Restoran & Café", "slug": "restaurant", "icon": "🍽️", "is_active": true},
+		{"name": "Grosir & Sembako", "slug": "grosir-sembako", "icon": "🏪", "is_active": true},
+		{"name": "Fashion & Pakaian", "slug": "fashion", "icon": "👗", "is_active": true},
+		{"name": "Minimarket & Toko", "slug": "minimarket", "icon": "🏬", "is_active": true},
+		{"name": "Apotek & Kesehatan", "slug": "apotek", "icon": "💊", "is_active": true},
+		{"name": "Elektronik & Gadget", "slug": "elektronik", "icon": "📱", "is_active": true},
+		{"name": "Bahan Bangunan", "slug": "bangunan", "icon": "🧱", "is_active": true},
+		{"name": "Bengkel & Otomotif", "slug": "otomotif", "icon": "🔧", "is_active": true},
+		{"name": "Salon & Kecantikan", "slug": "kecantikan", "icon": "💇", "is_active": true},
+		{"name": "Laundry & Kebersihan", "slug": "laundry", "icon": "🧺", "is_active": true},
+		{"name": "Percetakan & ATK", "slug": "percetakan", "icon": "🖨️", "is_active": true},
+		{"name": "Pet Shop & Hewan", "slug": "pet-shop", "icon": "🐾", "is_active": true},
+		{"name": "Pertanian & Peternakan", "slug": "pertanian", "icon": "🌾", "is_active": true},
+		{"name": "Furniture & Interior", "slug": "furniture", "icon": "🪑", "is_active": true},
+		{"name": "Olahraga & Outdoor", "slug": "olahraga", "icon": "⚽", "is_active": true},
+		{"name": "Bakery & Pastry", "slug": "bakery", "icon": "🍰", "is_active": true},
+		{"name": "Frozen Food", "slug": "frozen-food", "icon": "🧊", "is_active": true},
+		{"name": "Kerajinan & Souvenir", "slug": "craft", "icon": "🎨", "is_active": true},
+		{"name": "Optik & Kacamata", "slug": "optic", "icon": "👓", "is_active": true},
+		{"name": "Fotografi & Studio", "slug": "fotografi", "icon": "📷", "is_active": true},
+		{"name": "Jasa & Servis", "slug": "jasa", "icon": "🛠️", "is_active": true},
+		{"name": "Florist & Tanaman", "slug": "florist", "icon": "🌸", "is_active": true},
+		{"name": "Seafood & Ikan", "slug": "seafood", "icon": "🐟", "is_active": true},
+		{"name": "Distributor & Agen", "slug": "distributor", "icon": "🚛", "is_active": true},
 	}
 
 	for _, mt := range types {
-		db.Table("merchant_types").Create(mt)
+		// Upsert: skip if slug already exists
+		var existing int64
+		db.Table("merchant_types").Where("slug = ?", mt["slug"]).Count(&existing)
+		if existing == 0 {
+			db.Table("merchant_types").Create(mt)
+		}
 	}
-	log.Println("✅ Default merchant types seeded")
+	log.Println("✅ 24 merchant types seeded")
 }
 
 func seedGlobalConfigs(db *gorm.DB) {
@@ -869,4 +921,213 @@ func seedDefaultRolePermissions(db *gorm.DB) {
 		db.Table("role_permissions").Create(rp)
 	}
 	log.Println("✅ Default role permissions seeded")
+}
+
+func seedBusinessUnits(db *gorm.DB) {
+	var count int64
+	db.Table("business_units").Count(&count)
+	if count > 0 {
+		return
+	}
+
+	// Map merchant type slug -> units
+	unitMap := map[string][]string{
+		"restaurant":     {"pcs", "porsi", "mangkok", "gelas", "cup", "botol"},
+		"grosir-sembako": {"pcs", "kg", "gram", "liter", "ml", "karung", "dus", "lusin", "kodi"},
+		"fashion":        {"pcs", "pasang", "set", "lusin", "kodi", "roll", "meter", "yard"},
+		"minimarket":     {"pcs", "pack", "dus", "karton", "lusin", "botol", "kaleng", "sachet"},
+		"apotek":         {"pcs", "tablet", "kapsul", "strip", "botol", "tube", "box", "sachet"},
+		"elektronik":     {"pcs", "unit", "set", "pack"},
+		"bangunan":       {"pcs", "kg", "sak", "batang", "lembar", "m²", "m³", "truk", "karung"},
+		"otomotif":       {"pcs", "set", "liter", "kaleng", "unit", "pasang"},
+		"kecantikan":     {"pcs", "botol", "tube", "sachet", "ml", "treatment"},
+		"laundry":        {"kg", "pcs", "set", "pasang"},
+		"percetakan":     {"pcs", "rim", "lembar", "set", "roll", "box", "lusin"},
+		"pet-shop":       {"pcs", "kg", "gram", "pack", "sachet", "ekor"},
+		"pertanian":      {"kg", "ton", "liter", "ekor", "ikat", "karung", "tray"},
+		"furniture":      {"pcs", "set", "unit", "meter", "m²", "lembar"},
+		"olahraga":       {"pcs", "pasang", "set", "unit"},
+		"bakery":         {"pcs", "loyang", "box", "lusin", "pack", "slice"},
+		"frozen-food":    {"pcs", "pack", "kg", "gram", "dus", "karton"},
+		"craft":          {"pcs", "set", "lusin", "kodi", "pasang", "box"},
+		"optic":          {"pcs", "pasang", "set", "box"},
+		"fotografi":      {"pcs", "lembar", "album", "roll", "set"},
+		"jasa":           {"layanan", "jam", "sesi", "project"},
+		"florist":        {"pcs", "pot", "buket", "ikat", "tray"},
+		"seafood":        {"kg", "gram", "ekor", "pack", "porsi"},
+		"distributor":    {"pcs", "dus", "karton", "palet", "lusin", "kodi", "gross"},
+	}
+
+	labelMap := map[string]string{
+		"pcs": "Pieces", "porsi": "Porsi", "mangkok": "Mangkok", "gelas": "Gelas",
+		"cup": "Cup", "botol": "Botol", "kg": "Kilogram", "gram": "Gram",
+		"liter": "Liter", "ml": "Mililiter", "karung": "Karung", "dus": "Dus",
+		"lusin": "Lusin (12)", "kodi": "Kodi (20)", "pasang": "Pasang", "set": "Set",
+		"roll": "Roll", "meter": "Meter", "yard": "Yard", "pack": "Pack",
+		"karton": "Karton", "kaleng": "Kaleng", "sachet": "Sachet",
+		"tablet": "Tablet", "kapsul": "Kapsul", "strip": "Strip", "tube": "Tube",
+		"box": "Box", "unit": "Unit", "sak": "Sak", "batang": "Batang",
+		"lembar": "Lembar", "m²": "Meter Persegi", "m³": "Meter Kubik",
+		"truk": "Truk", "treatment": "Treatment", "rim": "Rim (500 lembar)",
+		"ekor": "Ekor", "ton": "Ton", "ikat": "Ikat", "tray": "Tray",
+		"loyang": "Loyang", "slice": "Slice", "palet": "Palet", "gross": "Gross (144)",
+		"album": "Album", "layanan": "Layanan", "jam": "Jam", "sesi": "Sesi",
+		"project": "Project", "pot": "Pot", "buket": "Buket",
+	}
+
+	for slug, units := range unitMap {
+		var mt domain.MerchantType
+		if err := db.Where("slug = ?", slug).First(&mt).Error; err != nil {
+			continue
+		}
+		for i, unitName := range units {
+			label := labelMap[unitName]
+			if label == "" {
+				label = unitName
+			}
+			db.Table("business_units").Create(map[string]interface{}{
+				"merchant_type_id": mt.ID,
+				"name":             unitName,
+				"label":            label,
+				"sort_order":       i,
+			})
+		}
+	}
+	log.Println("✅ Business units seeded for all merchant types")
+}
+
+func seedPriceReferences(db *gorm.DB) {
+	var count int64
+	db.Table("price_references").Count(&count)
+	if count > 0 {
+		return
+	}
+
+	refs := []map[string]interface{}{
+		// Makanan
+		{"name": "Nasi Goreng", "category": "Makanan", "avg_price": 25000, "min_price": 15000, "max_price": 35000, "source": "market_data"},
+		{"name": "Mie Goreng", "category": "Makanan", "avg_price": 22000, "min_price": 12000, "max_price": 30000, "source": "market_data"},
+		{"name": "Ayam Goreng", "category": "Makanan", "avg_price": 30000, "min_price": 20000, "max_price": 45000, "source": "market_data"},
+		{"name": "Ayam Betutu", "category": "Makanan", "avg_price": 45000, "min_price": 35000, "max_price": 65000, "source": "market_data"},
+		{"name": "Ayam Bakar", "category": "Makanan", "avg_price": 35000, "min_price": 25000, "max_price": 50000, "source": "market_data"},
+		{"name": "Sate Ayam", "category": "Makanan", "avg_price": 30000, "min_price": 20000, "max_price": 40000, "source": "market_data"},
+		{"name": "Bakso", "category": "Makanan", "avg_price": 20000, "min_price": 12000, "max_price": 30000, "source": "market_data"},
+		{"name": "Soto Ayam", "category": "Makanan", "avg_price": 22000, "min_price": 15000, "max_price": 30000, "source": "market_data"},
+		{"name": "Gado-gado", "category": "Makanan", "avg_price": 20000, "min_price": 12000, "max_price": 28000, "source": "market_data"},
+		{"name": "Rendang", "category": "Makanan", "avg_price": 40000, "min_price": 30000, "max_price": 55000, "source": "market_data"},
+		{"name": "Nasi Campur", "category": "Makanan", "avg_price": 30000, "min_price": 20000, "max_price": 40000, "source": "market_data"},
+		{"name": "Nasi Padang", "category": "Makanan", "avg_price": 28000, "min_price": 18000, "max_price": 40000, "source": "market_data"},
+		{"name": "Cap Cay", "category": "Makanan", "avg_price": 25000, "min_price": 18000, "max_price": 35000, "source": "market_data"},
+		{"name": "Ikan Bakar", "category": "Makanan", "avg_price": 40000, "min_price": 25000, "max_price": 60000, "source": "market_data"},
+		{"name": "Udang Goreng", "category": "Makanan", "avg_price": 45000, "min_price": 30000, "max_price": 65000, "source": "market_data"},
+		{"name": "Pecel Lele", "category": "Makanan", "avg_price": 18000, "min_price": 12000, "max_price": 25000, "source": "market_data"},
+		{"name": "Bebek Goreng", "category": "Makanan", "avg_price": 35000, "min_price": 25000, "max_price": 50000, "source": "market_data"},
+		{"name": "Martabak Manis", "category": "Makanan", "avg_price": 40000, "min_price": 25000, "max_price": 60000, "source": "market_data"},
+		{"name": "Martabak Telur", "category": "Makanan", "avg_price": 35000, "min_price": 20000, "max_price": 50000, "source": "market_data"},
+		{"name": "Pizza", "category": "Makanan", "avg_price": 60000, "min_price": 35000, "max_price": 120000, "source": "market_data"},
+		{"name": "Burger", "category": "Makanan", "avg_price": 35000, "min_price": 20000, "max_price": 55000, "source": "market_data"},
+		{"name": "Dimsum", "category": "Makanan", "avg_price": 25000, "min_price": 15000, "max_price": 40000, "source": "market_data"},
+		{"name": "Cireng", "category": "Makanan", "avg_price": 10000, "min_price": 5000, "max_price": 15000, "source": "market_data"},
+		{"name": "Batagor", "category": "Makanan", "avg_price": 15000, "min_price": 10000, "max_price": 25000, "source": "market_data"},
+		{"name": "Siomay", "category": "Makanan", "avg_price": 15000, "min_price": 10000, "max_price": 25000, "source": "market_data"},
+		{"name": "Pempek", "category": "Makanan", "avg_price": 20000, "min_price": 12000, "max_price": 30000, "source": "market_data"},
+
+		// Minuman
+		{"name": "Es Teh Manis", "category": "Minuman", "avg_price": 5000, "min_price": 3000, "max_price": 8000, "source": "market_data"},
+		{"name": "Es Jeruk", "category": "Minuman", "avg_price": 8000, "min_price": 5000, "max_price": 12000, "source": "market_data"},
+		{"name": "Kopi Hitam", "category": "Minuman", "avg_price": 10000, "min_price": 5000, "max_price": 15000, "source": "market_data"},
+		{"name": "Kopi Susu", "category": "Minuman", "avg_price": 18000, "min_price": 12000, "max_price": 28000, "source": "market_data"},
+		{"name": "Cappuccino", "category": "Minuman", "avg_price": 25000, "min_price": 18000, "max_price": 35000, "source": "market_data"},
+		{"name": "Latte", "category": "Minuman", "avg_price": 28000, "min_price": 20000, "max_price": 38000, "source": "market_data"},
+		{"name": "Matcha Latte", "category": "Minuman", "avg_price": 30000, "min_price": 22000, "max_price": 40000, "source": "market_data"},
+		{"name": "Jus Alpukat", "category": "Minuman", "avg_price": 15000, "min_price": 10000, "max_price": 22000, "source": "market_data"},
+		{"name": "Jus Mangga", "category": "Minuman", "avg_price": 13000, "min_price": 8000, "max_price": 18000, "source": "market_data"},
+		{"name": "Smoothie Bowl", "category": "Minuman", "avg_price": 35000, "min_price": 25000, "max_price": 50000, "source": "market_data"},
+		{"name": "Air Mineral", "category": "Minuman", "avg_price": 5000, "min_price": 3000, "max_price": 8000, "source": "market_data"},
+		{"name": "Teh Tarik", "category": "Minuman", "avg_price": 12000, "min_price": 8000, "max_price": 18000, "source": "market_data"},
+		{"name": "Boba Milk Tea", "category": "Minuman", "avg_price": 22000, "min_price": 15000, "max_price": 30000, "source": "market_data"},
+
+		// Snack
+		{"name": "Keripik Singkong", "category": "Snack", "avg_price": 10000, "min_price": 5000, "max_price": 15000, "source": "market_data"},
+		{"name": "Kue Brownies", "category": "Snack", "avg_price": 25000, "min_price": 15000, "max_price": 40000, "source": "market_data"},
+		{"name": "Roti Bakar", "category": "Snack", "avg_price": 15000, "min_price": 8000, "max_price": 22000, "source": "market_data"},
+		{"name": "Pisang Goreng", "category": "Snack", "avg_price": 10000, "min_price": 5000, "max_price": 15000, "source": "market_data"},
+		{"name": "Donat", "category": "Snack", "avg_price": 8000, "min_price": 5000, "max_price": 15000, "source": "market_data"},
+		{"name": "Croissant", "category": "Snack", "avg_price": 18000, "min_price": 12000, "max_price": 28000, "source": "market_data"},
+
+		// Sembako
+		{"name": "Beras 5kg", "category": "Sembako", "avg_price": 65000, "min_price": 55000, "max_price": 80000, "source": "market_data"},
+		{"name": "Beras 10kg", "category": "Sembako", "avg_price": 130000, "min_price": 110000, "max_price": 160000, "source": "market_data"},
+		{"name": "Minyak Goreng 1L", "category": "Sembako", "avg_price": 18000, "min_price": 14000, "max_price": 22000, "source": "market_data"},
+		{"name": "Minyak Goreng 2L", "category": "Sembako", "avg_price": 34000, "min_price": 28000, "max_price": 42000, "source": "market_data"},
+		{"name": "Gula Pasir 1kg", "category": "Sembako", "avg_price": 16000, "min_price": 13000, "max_price": 18000, "source": "market_data"},
+		{"name": "Tepung Terigu 1kg", "category": "Sembako", "avg_price": 12000, "min_price": 9000, "max_price": 15000, "source": "market_data"},
+		{"name": "Telur 1kg", "category": "Sembako", "avg_price": 28000, "min_price": 24000, "max_price": 32000, "source": "market_data"},
+		{"name": "Susu UHT 1L", "category": "Sembako", "avg_price": 18000, "min_price": 14000, "max_price": 22000, "source": "market_data"},
+		{"name": "Mie Instan", "category": "Sembako", "avg_price": 3500, "min_price": 2500, "max_price": 5000, "source": "market_data"},
+		{"name": "Kecap Manis", "category": "Sembako", "avg_price": 12000, "min_price": 8000, "max_price": 16000, "source": "market_data"},
+		{"name": "Sambal Botol", "category": "Sembako", "avg_price": 15000, "min_price": 10000, "max_price": 20000, "source": "market_data"},
+		{"name": "Sabun Cuci Piring", "category": "Sembako", "avg_price": 12000, "min_price": 8000, "max_price": 16000, "source": "market_data"},
+		{"name": "Deterjen 1kg", "category": "Sembako", "avg_price": 15000, "min_price": 10000, "max_price": 20000, "source": "market_data"},
+
+		// Fashion
+		{"name": "Kaos Polos", "category": "Fashion", "avg_price": 60000, "min_price": 35000, "max_price": 100000, "source": "market_data"},
+		{"name": "Kemeja Pria", "category": "Fashion", "avg_price": 150000, "min_price": 80000, "max_price": 250000, "source": "market_data"},
+		{"name": "Celana Jeans", "category": "Fashion", "avg_price": 200000, "min_price": 120000, "max_price": 350000, "source": "market_data"},
+		{"name": "Dress Wanita", "category": "Fashion", "avg_price": 180000, "min_price": 80000, "max_price": 350000, "source": "market_data"},
+		{"name": "Jaket Hoodie", "category": "Fashion", "avg_price": 150000, "min_price": 80000, "max_price": 250000, "source": "market_data"},
+		{"name": "Sepatu Sneakers", "category": "Fashion", "avg_price": 250000, "min_price": 150000, "max_price": 500000, "source": "market_data"},
+		{"name": "Sandal", "category": "Fashion", "avg_price": 60000, "min_price": 25000, "max_price": 120000, "source": "market_data"},
+		{"name": "Topi", "category": "Fashion", "avg_price": 50000, "min_price": 25000, "max_price": 100000, "source": "market_data"},
+		{"name": "Tas Selempang", "category": "Fashion", "avg_price": 100000, "min_price": 50000, "max_price": 200000, "source": "market_data"},
+		{"name": "Hijab", "category": "Fashion", "avg_price": 45000, "min_price": 20000, "max_price": 80000, "source": "market_data"},
+		{"name": "Kain Batik", "category": "Fashion", "avg_price": 80000, "min_price": 40000, "max_price": 200000, "source": "market_data"},
+
+		// Elektronik
+		{"name": "Charger HP", "category": "Elektronik", "avg_price": 50000, "min_price": 25000, "max_price": 100000, "source": "market_data"},
+		{"name": "Earphone", "category": "Elektronik", "avg_price": 80000, "min_price": 30000, "max_price": 200000, "source": "market_data"},
+		{"name": "Kabel Data", "category": "Elektronik", "avg_price": 30000, "min_price": 15000, "max_price": 60000, "source": "market_data"},
+		{"name": "Power Bank", "category": "Elektronik", "avg_price": 150000, "min_price": 80000, "max_price": 300000, "source": "market_data"},
+		{"name": "Casing HP", "category": "Elektronik", "avg_price": 40000, "min_price": 15000, "max_price": 80000, "source": "market_data"},
+		{"name": "Screen Protector", "category": "Elektronik", "avg_price": 25000, "min_price": 10000, "max_price": 50000, "source": "market_data"},
+		{"name": "Mouse Wireless", "category": "Elektronik", "avg_price": 80000, "min_price": 40000, "max_price": 150000, "source": "market_data"},
+		{"name": "Keyboard", "category": "Elektronik", "avg_price": 150000, "min_price": 60000, "max_price": 300000, "source": "market_data"},
+
+		// Apotek & Kesehatan
+		{"name": "Paracetamol", "category": "Apotek", "avg_price": 5000, "min_price": 3000, "max_price": 8000, "source": "market_data"},
+		{"name": "Vitamin C", "category": "Apotek", "avg_price": 15000, "min_price": 8000, "max_price": 25000, "source": "market_data"},
+		{"name": "Masker Medis (50pcs)", "category": "Apotek", "avg_price": 30000, "min_price": 20000, "max_price": 45000, "source": "market_data"},
+		{"name": "Hand Sanitizer", "category": "Apotek", "avg_price": 15000, "min_price": 8000, "max_price": 25000, "source": "market_data"},
+		{"name": "Plester Luka", "category": "Apotek", "avg_price": 8000, "min_price": 5000, "max_price": 12000, "source": "market_data"},
+
+		// Pet Shop
+		{"name": "Makanan Kucing 1kg", "category": "Pet Shop", "avg_price": 35000, "min_price": 20000, "max_price": 60000, "source": "market_data"},
+		{"name": "Makanan Anjing 1kg", "category": "Pet Shop", "avg_price": 40000, "min_price": 25000, "max_price": 65000, "source": "market_data"},
+		{"name": "Pasir Kucing 5L", "category": "Pet Shop", "avg_price": 30000, "min_price": 20000, "max_price": 45000, "source": "market_data"},
+		{"name": "Kalung Hewan", "category": "Pet Shop", "avg_price": 25000, "min_price": 10000, "max_price": 50000, "source": "market_data"},
+
+		// Bangunan
+		{"name": "Semen 50kg", "category": "Bangunan", "avg_price": 65000, "min_price": 55000, "max_price": 75000, "source": "market_data"},
+		{"name": "Cat Tembok 5kg", "category": "Bangunan", "avg_price": 80000, "min_price": 50000, "max_price": 120000, "source": "market_data"},
+		{"name": "Paku 1kg", "category": "Bangunan", "avg_price": 20000, "min_price": 15000, "max_price": 30000, "source": "market_data"},
+		{"name": "Pipa PVC", "category": "Bangunan", "avg_price": 25000, "min_price": 15000, "max_price": 40000, "source": "market_data"},
+		{"name": "Keramik 40x40", "category": "Bangunan", "avg_price": 55000, "min_price": 35000, "max_price": 80000, "source": "market_data"},
+
+		// Kecantikan
+		{"name": "Skincare Set", "category": "Kecantikan", "avg_price": 150000, "min_price": 50000, "max_price": 300000, "source": "market_data"},
+		{"name": "Lipstik", "category": "Kecantikan", "avg_price": 50000, "min_price": 25000, "max_price": 100000, "source": "market_data"},
+		{"name": "Sunscreen", "category": "Kecantikan", "avg_price": 60000, "min_price": 30000, "max_price": 120000, "source": "market_data"},
+		{"name": "Serum Wajah", "category": "Kecantikan", "avg_price": 80000, "min_price": 40000, "max_price": 150000, "source": "market_data"},
+
+		// Bakery
+		{"name": "Roti Tawar", "category": "Bakery", "avg_price": 15000, "min_price": 10000, "max_price": 22000, "source": "market_data"},
+		{"name": "Roti Coklat", "category": "Bakery", "avg_price": 8000, "min_price": 5000, "max_price": 12000, "source": "market_data"},
+		{"name": "Kue Tart", "category": "Bakery", "avg_price": 150000, "min_price": 80000, "max_price": 300000, "source": "market_data"},
+		{"name": "Cookies", "category": "Bakery", "avg_price": 30000, "min_price": 15000, "max_price": 50000, "source": "market_data"},
+	}
+
+	for _, ref := range refs {
+		db.Table("price_references").Create(ref)
+	}
+	log.Println("✅ Price references seeded (~100 products)")
 }
