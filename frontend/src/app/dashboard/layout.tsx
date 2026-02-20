@@ -12,6 +12,7 @@ import {
     LayoutDashboard, ShoppingCart, Package, Warehouse,
     Receipt, Store, BookOpen, FileText, BarChart3,
     Building2, Settings, LogOut, ChevronLeft, Menu, Crown, Shield, Users, Brain, Truck, Palette, Printer, Globe,
+    X, MoreHorizontal, User,
 } from "lucide-react";
 
 
@@ -51,6 +52,14 @@ const allMenuItems: MenuItem[] = [
     { label: "Printer & Struk", icon: Printer, href: "/dashboard/settings/printer", permission: "manage_settings" },
 ];
 
+// Bottom nav items — the 4 most important + "More"
+const bottomNavItems = [
+    { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+    { label: "POS", icon: ShoppingCart, href: "/dashboard/pos" },
+    { label: "Produk", icon: Package, href: "/dashboard/products" },
+    { label: "Transaksi", icon: Receipt, href: "/dashboard/transactions" },
+];
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
@@ -63,14 +72,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [showTour, setShowTour] = useState(false);
 
     // FTUX and ProductTour disabled — no longer auto-show overlays
-    // Users can re-enable via settings if needed
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            // Mark as done so overlays never block the dashboard
             localStorage.setItem('codapos_ftux_done', 'true');
             localStorage.setItem('codapos_tour_done', 'true');
         }
     }, []);
+
+    // Close mobile drawer on route change
+    useEffect(() => {
+        setMobileOpen(false);
+    }, [pathname]);
 
     // Poll active delivery order count for MyKurir badge
     const fetchDeliveryCount = useCallback(async () => {
@@ -89,7 +101,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // Filter menu based on user permissions
     const menuItems = useMemo(() => {
         return allMenuItems.filter(item => {
-            if (!item.permission) return true; // no permission = always visible
+            if (!item.permission) return true;
             return hasPermission(item.permission);
         });
     }, [hasPermission]);
@@ -112,6 +124,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         router.push("/login");
     };
 
+    // Check if a bottom nav item is active
+    const isBottomNavActive = (href: string) => {
+        if (href === "/dashboard") return pathname === "/dashboard";
+        return pathname.startsWith(href);
+    };
+
     return (
         <>
             {/* FTUX Onboarding Wizard Overlay */}
@@ -120,7 +138,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     userName={user?.full_name || "Partner"}
                     onComplete={() => {
                         setShowFtux(false);
-                        // Auto-start product tour after FTUX
                         if (!localStorage.getItem('codapos_tour_done')) {
                             setTimeout(() => setShowTour(true), 500);
                         }
@@ -131,33 +148,46 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {showTour && !showFtux && (
                 <ProductTour onComplete={() => setShowTour(false)} />
             )}
-            <div className="min-h-screen flex bg-[#0a0a0f] overflow-x-hidden isolate">
-                {/* Mobile overlay */}
+
+            <div className="min-h-screen flex bg-[#0a0a0f] overflow-x-hidden">
+                {/* ======= MOBILE SIDEBAR DRAWER OVERLAY ======= */}
                 {mobileOpen && (
-                    <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
+                    <div
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[998] lg:hidden"
+                        onClick={() => setMobileOpen(false)}
+                    />
                 )}
 
-                {/* Sidebar */}
+                {/* ======= SIDEBAR (Desktop: sticky | Mobile: slide-in drawer) ======= */}
                 <aside className={`
-        fixed lg:sticky top-0 left-0 h-screen z-50
-        glass-sidebar flex flex-col
-        transition-all duration-300 ease-in-out
-        ${collapsed ? "w-20" : "w-64"}
-        ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-      `}>
-                    {/* Logo */}
+                    fixed top-0 left-0 h-screen z-[999]
+                    lg:sticky lg:top-0 lg:z-30
+                    glass-sidebar flex flex-col
+                    transition-transform duration-300 ease-in-out will-change-transform
+                    ${collapsed ? "lg:w-20" : "lg:w-64"}
+                    w-[280px]
+                    ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+                `}>
+                    {/* Logo + Close Button */}
                     <div className="flex items-center gap-3 p-5 border-b border-white/5">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DA1F2] to-[#A7D8FF] flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-900/20">
                             <Store className="w-5 h-5 text-white" />
                         </div>
                         {!collapsed && (
-                            <div className="animate-fade-in">
+                            <div className="animate-fade-in flex-1">
                                 <h1 className="font-bold text-white text-lg tracking-tight">
                                     CODA<span className="text-[#1DA1F2]">POS</span>
                                 </h1>
                                 <p className="text-[10px] text-white/30 -mt-0.5">Cloud POS &amp; Merchant Platform</p>
                             </div>
                         )}
+                        {/* Close button - mobile only */}
+                        <button
+                            onClick={() => setMobileOpen(false)}
+                            className="lg:hidden ml-auto w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
                     </div>
 
                     {/* Menu */}
@@ -179,14 +209,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     onClick={() => setMobileOpen(false)}
                                     {...(item.tourId ? { 'data-tour': item.tourId } : {})}
                                     className={`
-                  relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                  transition-all duration-200
-                  ${isActive
+                                        relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                                        transition-all duration-200
+                                        ${isActive
                                             ? "bg-gradient-to-r from-[#1DA1F2]/20 to-[#1DA1F2]/5 text-white border border-[#1DA1F2]/20"
                                             : "text-white/50 hover:text-white hover:bg-white/5"
                                         }
-                  ${collapsed ? "justify-center" : ""}
-                `}
+                                        ${collapsed ? "justify-center" : ""}
+                                    `}
                                 >
                                     <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-[#1DA1F2]" : ""}`} />
                                     {!collapsed && (
@@ -234,7 +264,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         </button>
                     </div>
 
-                    {/* Collapse toggle */}
+                    {/* Collapse toggle - desktop only */}
                     <button
                         onClick={() => setCollapsed(!collapsed)}
                         className="hidden lg:flex absolute -right-3 top-7 w-6 h-6 rounded-full bg-[#1a1a2e] border border-white/10 items-center justify-center text-white/30 hover:text-white hover:bg-[#1DA1F2] transition-all"
@@ -243,26 +273,72 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </button>
                 </aside>
 
-                {/* Main Content */}
-                <div className="flex-1 min-h-screen flex flex-col relative z-20 pointer-events-auto">
+                {/* ======= MAIN CONTENT ======= */}
+                <div className="flex-1 min-h-screen flex flex-col relative">
                     {/* Top bar */}
-                    <header className="sticky top-0 z-30 glass-subtle h-14 md:h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/5 pointer-events-auto">
-                        <button onClick={() => setMobileOpen(true)} className="lg:hidden text-white/50 hover:text-white">
-                            <Menu className="w-6 h-6" />
-                        </button>
+                    <header className="sticky top-0 z-30 glass-subtle h-14 flex items-center justify-between px-4 md:px-6 border-b border-white/5">
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setMobileOpen(true)}
+                                className="lg:hidden w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                            >
+                                <Menu className="w-5 h-5" />
+                            </button>
+                            {/* Mobile: show logo in header */}
+                            <div className="lg:hidden flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#1DA1F2] to-[#A7D8FF] flex items-center justify-center">
+                                    <Store className="w-3.5 h-3.5 text-white" />
+                                </div>
+                                <span className="font-bold text-white text-sm">
+                                    CODA<span className="text-[#1DA1F2]">POS</span>
+                                </span>
+                            </div>
+                        </div>
                         <div className="flex items-center gap-4" data-tour="tour-topbar">
                             <div className="text-right">
                                 <p className="text-xs text-white/30">{user?.tenant?.name || "CODAPOS"}</p>
                             </div>
+                            {/* Mobile: user avatar in header */}
+                            <Link href="/dashboard/profile" className="lg:hidden">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1DA1F2] to-[#A7D8FF] flex items-center justify-center text-xs font-bold text-white">
+                                    {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
+                                </div>
+                            </Link>
                         </div>
                     </header>
 
                     {/* Page content */}
-                    <main className="flex-1 p-3 sm:p-4 md:p-6 relative z-10 pointer-events-auto">
+                    <main className="flex-1 p-4 md:p-6 pb-24 lg:pb-6 relative">
                         {children}
                     </main>
                 </div>
-            </div >
+
+                {/* ======= MOBILE BOTTOM NAVIGATION ======= */}
+                <nav className="mobile-bottom-nav lg:hidden">
+                    {bottomNavItems.map((item, i) => {
+                        const Icon = item.icon;
+                        const isActive = isBottomNavActive(item.href);
+                        return (
+                            <Link
+                                key={i}
+                                href={item.href}
+                                className={`mobile-nav-item ${isActive ? "mobile-nav-item-active" : ""}`}
+                            >
+                                <Icon className="w-5 h-5" />
+                                <span>{item.label}</span>
+                            </Link>
+                        );
+                    })}
+                    {/* More button — opens full sidebar drawer */}
+                    <button
+                        onClick={() => setMobileOpen(true)}
+                        className={`mobile-nav-item ${mobileOpen ? "mobile-nav-item-active" : ""}`}
+                    >
+                        <MoreHorizontal className="w-5 h-5" />
+                        <span>Lainnya</span>
+                    </button>
+                </nav>
+            </div>
         </>
     );
 }

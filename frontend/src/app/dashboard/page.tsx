@@ -55,7 +55,7 @@ export default function DashboardPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Page Header */}
             <div className="animate-fade-in">
                 <h1 className="text-2xl font-bold text-white">Dashboard</h1>
@@ -70,7 +70,7 @@ export default function DashboardPage() {
             ) : (
                 <>
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                         {stats.map((stat, i) => {
                             const Icon = stat.icon;
                             return (
@@ -81,7 +81,7 @@ export default function DashboardPage() {
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <p className="text-xs text-white/40 font-medium uppercase tracking-wider">{stat.label}</p>
-                                            <p className="text-xl sm:text-2xl font-bold text-white mt-2">{stat.value}</p>
+                                            <p className="text-lg sm:text-2xl font-bold text-white mt-1 sm:mt-2 break-all">{stat.value}</p>
                                         </div>
                                         <div
                                             className="w-10 h-10 rounded-xl flex items-center justify-center"
@@ -180,7 +180,7 @@ export default function DashboardPage() {
                     {/* Quick Actions */}
                     <div className="glass p-6 animate-fade-in" style={{ animationDelay: '0.5s' }}>
                         <h2 className="text-lg font-semibold text-white mb-4">Aksi Cepat</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {[
                                 { label: "Buka Kasir", icon: ShoppingCart, href: "/dashboard/pos" },
                                 { label: "Tambah Produk", icon: Package, href: "/dashboard/products" },
