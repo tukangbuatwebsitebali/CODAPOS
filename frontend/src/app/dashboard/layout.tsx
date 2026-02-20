@@ -313,31 +313,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </main>
                 </div>
 
-                {/* ======= MOBILE BOTTOM NAVIGATION ======= */}
-                <nav className="mobile-bottom-nav lg:hidden">
-                    {bottomNavItems.map((item, i) => {
-                        const Icon = item.icon;
-                        const isActive = isBottomNavActive(item.href);
-                        return (
-                            <Link
-                                key={i}
-                                href={item.href}
-                                className={`mobile-nav-item ${isActive ? "mobile-nav-item-active" : ""}`}
-                            >
-                                <Icon className="w-5 h-5" />
-                                <span>{item.label}</span>
-                            </Link>
-                        );
-                    })}
-                    {/* More button — opens full sidebar drawer */}
-                    <button
-                        onClick={() => setMobileOpen(true)}
-                        className={`mobile-nav-item ${mobileOpen ? "mobile-nav-item-active" : ""}`}
-                    >
-                        <MoreHorizontal className="w-5 h-5" />
-                        <span>Lainnya</span>
-                    </button>
-                </nav>
+                {/* ======= MOBILE BOTTOM NAVIGATION (hidden on POS page) ======= */}
+                {!pathname.startsWith("/dashboard/pos") && (
+                    <nav className="mobile-bottom-nav lg:hidden">
+                        {bottomNavItems.map((item, i) => {
+                            const Icon = item.icon;
+                            const isActive = isBottomNavActive(item.href);
+                            return (
+                                <Link
+                                    key={i}
+                                    href={item.href}
+                                    className={`mobile-nav-item ${isActive ? "mobile-nav-item-active" : ""}`}
+                                >
+                                    <Icon className="w-5 h-5" />
+                                    <span>{item.label}</span>
+                                </Link>
+                            );
+                        })}
+                        {/* More button — opens full sidebar drawer */}
+                        <button
+                            onClick={() => setMobileOpen(true)}
+                            className={`mobile-nav-item ${mobileOpen ? "mobile-nav-item-active" : ""}`}
+                        >
+                            <MoreHorizontal className="w-5 h-5" />
+                            <span>Lainnya</span>
+                        </button>
+                    </nav>
+                )}
             </div>
         </>
     );

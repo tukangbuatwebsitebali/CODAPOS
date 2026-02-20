@@ -368,7 +368,7 @@ export default function POSPage() {
             {/* Mobile Cart Toggle Button */}
             <button
                 onClick={() => setMobileCartOpen(true)}
-                className="lg:hidden fixed bottom-4 right-4 z-40 w-14 h-14 rounded-full bg-[#C40000] text-white shadow-2xl shadow-red-900/50 flex items-center justify-center hover:bg-[#E53030] transition-all active:scale-95"
+                className="lg:hidden fixed bottom-6 right-4 z-[950] w-14 h-14 rounded-full bg-[#C40000] text-white shadow-2xl shadow-red-900/50 flex items-center justify-center hover:bg-[#E53030] transition-all active:scale-95"
             >
                 <ShoppingBag className="w-6 h-6" />
                 {getItemCount() > 0 && (
@@ -380,15 +380,15 @@ export default function POSPage() {
 
             {/* Mobile Cart Overlay */}
             {mobileCartOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden" onClick={() => setMobileCartOpen(false)} />
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] lg:hidden" onClick={() => setMobileCartOpen(false)} />
             )}
 
             {/* RIGHT: Cart Panel — side panel on desktop, bottom drawer on mobile */}
             <div className={`
-                fixed bottom-0 left-0 right-0 z-50 lg:relative lg:z-0
+                fixed bottom-0 left-0 right-0 z-[1000] lg:relative lg:z-0
                 lg:w-96 glass-sidebar flex flex-col border-t lg:border-t-0 lg:border-l border-white/5
                 transition-transform duration-300 ease-in-out
-                h-[85vh] lg:h-auto rounded-t-3xl lg:rounded-none
+                h-[90vh] lg:h-auto rounded-t-3xl lg:rounded-none
                 ${mobileCartOpen ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
             `}>
                 {/* Cart Header */}
@@ -457,7 +457,7 @@ export default function POSPage() {
 
                 {/* Cart Footer / Payment */}
                 {items.length > 0 && (
-                    <div className="p-5 border-t border-white/5 space-y-3">
+                    <div className="p-5 pb-8 border-t border-white/5 space-y-3">
                         <div className="flex justify-between text-sm">
                             <span className="text-white/40">Subtotal</span>
                             <span className="text-white">{formatCurrency(getSubtotal())}</span>
