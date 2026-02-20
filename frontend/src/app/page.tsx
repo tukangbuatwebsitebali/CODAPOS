@@ -11,6 +11,18 @@ import {
   ChevronLeft, Languages,
 } from "lucide-react";
 import { useLanguageStore, useT, type Lang } from "@/lib/i18n";
+import { websiteAPI } from "@/lib/api";
+
+// ── CMS Data Types ──
+interface CMSBranding { logo_url: string; site_title: string; site_description: string; }
+interface CMSHeroSlide { badge: string; headline: string; subheadline: string; gradient: string; bg_image_url: string; hero_image_url: string; }
+interface CMSHero {
+  slides: CMSHeroSlide[];
+  cta_primary: string; cta_primary_link: string;
+  cta_secondary: string; cta_secondary_link: string;
+  trust_text: string; trust_rating: string;
+  show_dashboard_mockup: boolean;
+}
 
 // ═══════════════════════════════════════════════════════════════
 //  CODAPOS Landing Page — Premium Professional Design
@@ -80,10 +92,25 @@ export default function LandingPage() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [heroSlide, setHeroSlide] = useState(0);
   const [langDropdown, setLangDropdown] = useState(false);
+  const [cmsBranding, setCmsBranding] = useState<CMSBranding | null>(null);
+  const [cmsHero, setCmsHero] = useState<CMSHero | null>(null);
   const t = useT();
   const { lang, setLang, loadFromStorage } = useLanguageStore();
 
   useEffect(() => { loadFromStorage(); }, [loadFromStorage]);
+
+  // Fetch CMS configs from backend
+  useEffect(() => {
+    websiteAPI.getConfig().then(res => {
+      const data = res.data?.data || {};
+      if (data.website_branding) {
+        try { setCmsBranding(JSON.parse(data.website_branding)); } catch { }
+      }
+      if (data.website_hero) {
+        try { setCmsHero(JSON.parse(data.website_hero)); } catch { }
+      }
+    }).catch(() => { });
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -96,15 +123,16 @@ export default function LandingPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Hero auto-slide
+  // Hero auto-slide — dynamic count
+  const heroSlideCount = (cmsHero?.slides && cmsHero.slides.length > 0) ? cmsHero.slides.length : HERO_SLIDES.length;
   useEffect(() => {
-    const interval = setInterval(() => setHeroSlide((p) => (p + 1) % HERO_SLIDES.length), 6000);
+    const interval = setInterval(() => setHeroSlide((p) => (p + 1) % heroSlideCount), 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [heroSlideCount]);
 
   const goSlide = useCallback((dir: number) => {
-    setHeroSlide((p) => (p + dir + HERO_SLIDES.length) % HERO_SLIDES.length);
-  }, []);
+    setHeroSlide((p) => (p + dir + heroSlideCount) % heroSlideCount);
+  }, [heroSlideCount]);
 
   // Close lang dropdown on outside click
   useEffect(() => {
@@ -231,18 +259,24 @@ export default function LandingPage() {
       <nav className={`landing-nav ${scrolled ? "landing-nav-scrolled" : ""}`}>
         <div className="landing-container flex items-center justify-between h-16 md:h-20">
           <Link href="/" className="flex items-center gap-2.5 z-10">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#00B894] to-[#00CEC9] flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                <ShoppingCart className="w-5 h-5 text-white" />
-              </div>
-              <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white animate-pulse" />
-            </div>
-            <div>
-              <span className="text-xl font-extrabold text-gray-900 tracking-tight">
-                CODA<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00CEC9]">POS</span>
-              </span>
-              <p className="text-[9px] text-gray-400 -mt-1 font-medium tracking-wider">CLOUD POS PLATFORM</p>
-            </div>
+            {cmsBranding?.logo_url ? (
+              <img src={cmsBranding.logo_url} alt={cmsBranding.site_title || 'CODAPOS'} className="h-10 max-w-[180px] object-contain" />
+            ) : (
+              <>
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#00B894] to-[#00CEC9] flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <ShoppingCart className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white animate-pulse" />
+                </div>
+                <div>
+                  <span className="text-xl font-extrabold text-gray-900 tracking-tight">
+                    {cmsBranding?.site_title ? cmsBranding.site_title : (<>CODA<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00B894] to-[#00CEC9]">POS</span></>)}
+                  </span>
+                  <p className="text-[9px] text-gray-400 -mt-1 font-medium tracking-wider">{cmsBranding?.site_description || 'CLOUD POS PLATFORM'}</p>
+                </div>
+              </>
+            )}
           </Link>
           <div className="hidden md:flex items-center gap-8">
             {[
@@ -328,129 +362,160 @@ export default function LandingPage() {
       {/* ═══════ HERO CAROUSEL ═══════ */}
       <section className="hero-carousel">
         <div className="hero-slides-wrapper">
-          {HERO_SLIDES.map((slide, i) => (
-            <div
-              key={i}
-              className={`hero-slide bg-gradient-to-br ${slide.gradient} ${i === heroSlide ? "hero-slide-active" : "hero-slide-hidden"}`}
-            >
-              <div className="landing-container relative z-10 h-full flex items-center">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full pt-24 md:pt-28 pb-20">
-                  {/* Left: Text Content */}
-                  <div className="text-center lg:text-left">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-sm text-white font-semibold mb-6 md:mb-8">
-                      <Zap className="w-4 h-4" />
-                      {t(slide.badgeKey)}
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </div>
+          {(() => {
+            // Use CMS slides if available, fall back to HERO_SLIDES with translation keys
+            const slides = (cmsHero?.slides && cmsHero.slides.length > 0)
+              ? cmsHero.slides.map(s => ({
+                badge: s.badge,
+                headline: s.headline,
+                sub: s.subheadline,
+                gradient: s.gradient || 'from-[#0052D4] via-[#4364F7] to-[#6FB1FC]',
+                bgImageUrl: s.bg_image_url || '',
+                heroImageUrl: s.hero_image_url,
+              }))
+              : HERO_SLIDES.map(s => ({
+                badge: t(s.badgeKey),
+                headline: t(s.headlineKey),
+                sub: t(s.subKey),
+                gradient: s.gradient,
+                bgImageUrl: '',
+                heroImageUrl: '',
+              }));
 
-                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-[1.15] tracking-tight">
-                      {t(slide.headlineKey)}
-                    </h1>
-
-                    <p className="mt-4 md:mt-6 text-base md:text-lg text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                      {t(slide.subKey)}
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-8 md:mt-10 justify-center lg:justify-start">
-                      <Link href="/signup" className="hero-btn-primary">
-                        {t("hero.cta_primary")}
-                        <ArrowRight className="w-5 h-5" />
-                      </Link>
-                      <a href="#fitur" className="hero-btn-secondary">
-                        <Play className="w-5 h-5" />
-                        {t("hero.cta_secondary")}
-                      </a>
-                    </div>
-
-                    {/* Trust */}
-                    <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-8 md:mt-10 justify-center lg:justify-start">
-                      <div className="flex -space-x-3">
-                        {["RA", "BS", "MP", "DK", "AS"].map((init, j) => (
-                          <div key={j} className="w-9 h-9 rounded-full bg-white/20 border-[3px] border-white/40 flex items-center justify-center text-[10px] text-white font-bold backdrop-blur-sm">{init}</div>
-                        ))}
+            return slides.map((slide, i) => (
+              <div
+                key={i}
+                className={`hero-slide ${!slide.bgImageUrl ? `bg-gradient-to-br ${slide.gradient}` : ''} ${i === heroSlide ? "hero-slide-active" : "hero-slide-hidden"}`}
+                style={slide.bgImageUrl ? { backgroundImage: `url(${slide.bgImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+              >
+                {/* Dark overlay for readability when using bg image */}
+                {slide.bgImageUrl && <div className="absolute inset-0 bg-black/40 z-0" />}
+                <div className="landing-container relative z-10 h-full flex items-center">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full pt-24 md:pt-28 pb-20">
+                    {/* Left: Text Content */}
+                    <div className="text-center lg:text-left">
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-sm text-white font-semibold mb-6 md:mb-8">
+                        <Zap className="w-4 h-4" />
+                        {slide.badge}
+                        <ChevronRight className="w-3.5 h-3.5" />
                       </div>
-                      <div className="text-left">
-                        <div className="flex items-center gap-0.5">
-                          {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
-                          <span className="text-sm font-bold text-white ml-1">4.9/5</span>
-                        </div>
-                        <p className="text-xs text-white/60 mt-0.5">{t("hero.trust")}</p>
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Right: Visual Dashboard Mockup */}
-                  <div className="hidden lg:block relative">
-                    <div className="hero-visual-card animate-float">
-                      {/* Main Dashboard Card */}
-                      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/20">
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00B894] via-[#00CEC9] to-[#0099FF] rounded-t-3xl" />
-                        {/* Browser dots */}
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="w-3 h-3 rounded-full bg-red-400" />
-                          <div className="w-3 h-3 rounded-full bg-amber-400" />
-                          <div className="w-3 h-3 rounded-full bg-green-400" />
-                          <div className="flex-1 mx-3 h-6 bg-gray-50 rounded-lg flex items-center px-3">
-                            <span className="text-[9px] text-gray-400">app.codapos.com/dashboard</span>
-                          </div>
-                        </div>
-                        {/* Metrics */}
-                        <div className="grid grid-cols-3 gap-3 mb-4">
-                          {[
-                            { label: "Revenue", val: "Rp 12.5M", icon: "📈" },
-                            { label: "Orders", val: "847 trx", icon: "🛒" },
-                            { label: "Success", val: "98.2%", icon: "✅" },
-                          ].map((m, j) => (
-                            <div key={j} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                              <p className="text-[9px] text-gray-400 font-medium">{m.icon} {m.label}</p>
-                              <p className="text-sm font-extrabold text-gray-800 mt-0.5">{m.val}</p>
-                            </div>
+                      <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-[1.15] tracking-tight">
+                        {slide.headline}
+                      </h1>
+
+                      <p className="mt-4 md:mt-6 text-base md:text-lg text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                        {slide.sub}
+                      </p>
+
+                      <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-8 md:mt-10 justify-center lg:justify-start">
+                        <Link href={cmsHero?.cta_primary_link || "/signup"} className="hero-btn-primary">
+                          {cmsHero?.cta_primary || t("hero.cta_primary")}
+                          <ArrowRight className="w-5 h-5" />
+                        </Link>
+                        <a href={cmsHero?.cta_secondary_link || "#fitur"} className="hero-btn-secondary">
+                          <Play className="w-5 h-5" />
+                          {cmsHero?.cta_secondary || t("hero.cta_secondary")}
+                        </a>
+                      </div>
+
+                      {/* Trust */}
+                      <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-8 md:mt-10 justify-center lg:justify-start">
+                        <div className="flex -space-x-3">
+                          {["RA", "BS", "MP", "DK", "AS"].map((init, j) => (
+                            <div key={j} className="w-9 h-9 rounded-full bg-white/20 border-[3px] border-white/40 flex items-center justify-center text-[10px] text-white font-bold backdrop-blur-sm">{init}</div>
                           ))}
                         </div>
-                        {/* Chart */}
-                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-[10px] font-bold text-gray-700">{t("hero.visual.weekly_sales")}</span>
-                            <span className="text-[9px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">+12.5%</span>
+                        <div className="text-left">
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
+                            <span className="text-sm font-bold text-white ml-1">{cmsHero?.trust_rating || '4.9/5'}</span>
                           </div>
-                          <div className="flex items-end gap-1.5 h-16">
-                            {[35, 55, 42, 75, 48, 85, 62, 90, 55, 95, 70, 88].map((h, j) => (
-                              <div key={j} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, background: "linear-gradient(to top, #0066FF, #00CCFF)", opacity: 0.6 + j * 0.03 }} />
-                            ))}
-                          </div>
+                          <p className="text-xs text-white/60 mt-0.5">{cmsHero?.trust_text || t("hero.trust")}</p>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Floating Revenue Card */}
-                      <div className="absolute -top-4 -left-6 w-52 bg-white rounded-2xl shadow-2xl p-4 border border-gray-100 z-10 animate-float-delay">
-                        <div className="flex items-center gap-2.5 mb-2">
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
-                            <TrendingUp className="w-4 h-4 text-white" />
-                          </div>
-                          <div>
-                            <p className="text-[9px] text-gray-400">{t("hero.visual.revenue")}</p>
-                            <p className="text-sm font-extrabold text-gray-900">Rp 4.8M</p>
-                          </div>
+                    {/* Right: Visual — CMS image or Dashboard Mockup */}
+                    <div className="hidden lg:block relative">
+                      {slide.heroImageUrl ? (
+                        /* Custom CMS hero image */
+                        <div className="animate-float">
+                          <img src={slide.heroImageUrl} alt="Hero" className="w-full max-w-lg mx-auto rounded-2xl shadow-2xl" />
                         </div>
-                        <p className="text-[9px] text-emerald-600 font-semibold flex items-center gap-1"><TrendingUp className="w-3 h-3" /> +23%</p>
-                      </div>
+                      ) : (
+                        <div className="hero-visual-card animate-float">
+                          {/* Main Dashboard Card */}
+                          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/20">
+                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00B894] via-[#00CEC9] to-[#0099FF] rounded-t-3xl" />
+                            {/* Browser dots */}
+                            <div className="flex items-center gap-2 mb-4">
+                              <div className="w-3 h-3 rounded-full bg-red-400" />
+                              <div className="w-3 h-3 rounded-full bg-amber-400" />
+                              <div className="w-3 h-3 rounded-full bg-green-400" />
+                              <div className="flex-1 mx-3 h-6 bg-gray-50 rounded-lg flex items-center px-3">
+                                <span className="text-[9px] text-gray-400">app.codapos.com/dashboard</span>
+                              </div>
+                            </div>
+                            {/* Metrics */}
+                            <div className="grid grid-cols-3 gap-3 mb-4">
+                              {[
+                                { label: "Revenue", val: "Rp 12.5M", icon: "📈" },
+                                { label: "Orders", val: "847 trx", icon: "🛒" },
+                                { label: "Success", val: "98.2%", icon: "✅" },
+                              ].map((m, j) => (
+                                <div key={j} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                  <p className="text-[9px] text-gray-400 font-medium">{m.icon} {m.label}</p>
+                                  <p className="text-sm font-extrabold text-gray-800 mt-0.5">{m.val}</p>
+                                </div>
+                              ))}
+                            </div>
+                            {/* Chart */}
+                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                              <div className="flex items-center justify-between mb-3">
+                                <span className="text-[10px] font-bold text-gray-700">{t("hero.visual.weekly_sales")}</span>
+                                <span className="text-[9px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">+12.5%</span>
+                              </div>
+                              <div className="flex items-end gap-1.5 h-16">
+                                {[35, 55, 42, 75, 48, 85, 62, 90, 55, 95, 70, 88].map((h, j) => (
+                                  <div key={j} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, background: "linear-gradient(to top, #0066FF, #00CCFF)", opacity: 0.6 + j * 0.03 }} />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
 
-                      {/* Floating Orders Card */}
-                      <div className="absolute -bottom-4 -right-4 w-44 bg-white rounded-2xl shadow-2xl p-3.5 border border-gray-100 z-10 animate-float">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
-                            <ShoppingCart className="w-3.5 h-3.5 text-violet-600" />
+                          {/* Floating Revenue Card */}
+                          <div className="absolute -top-4 -left-6 w-52 bg-white rounded-2xl shadow-2xl p-4 border border-gray-100 z-10 animate-float-delay">
+                            <div className="flex items-center gap-2.5 mb-2">
+                              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
+                                <TrendingUp className="w-4 h-4 text-white" />
+                              </div>
+                              <div>
+                                <p className="text-[9px] text-gray-400">{t("hero.visual.revenue")}</p>
+                                <p className="text-sm font-extrabold text-gray-900">Rp 4.8M</p>
+                              </div>
+                            </div>
+                            <p className="text-[9px] text-emerald-600 font-semibold flex items-center gap-1"><TrendingUp className="w-3 h-3" /> +23%</p>
                           </div>
-                          <span className="text-[10px] font-bold text-gray-700">{t("hero.visual.transactions")}</span>
+
+                          {/* Floating Orders Card */}
+                          <div className="absolute -bottom-4 -right-4 w-44 bg-white rounded-2xl shadow-2xl p-3.5 border border-gray-100 z-10 animate-float">
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
+                                <ShoppingCart className="w-3.5 h-3.5 text-violet-600" />
+                              </div>
+                              <span className="text-[10px] font-bold text-gray-700">{t("hero.visual.transactions")}</span>
+                            </div>
+                            <p className="text-xl font-black text-gray-900">127</p>
+                          </div>
                         </div>
-                        <p className="text-xl font-black text-gray-900">127</p>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ));
+          })()}
         </div>
 
         {/* Navigation Arrows */}
@@ -471,14 +536,17 @@ export default function LandingPage() {
 
         {/* Dot Indicators */}
         <div className="hero-dots">
-          {HERO_SLIDES.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setHeroSlide(i)}
-              className={`hero-dot ${i === heroSlide ? "hero-dot-active" : ""}`}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
+          {(() => {
+            const count = (cmsHero?.slides && cmsHero.slides.length > 0) ? cmsHero.slides.length : HERO_SLIDES.length;
+            return Array.from({ length: count }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => setHeroSlide(i)}
+                className={`hero-dot ${i === heroSlide ? "hero-dot-active" : ""}`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ));
+          })()}
         </div>
       </section>
 
@@ -814,10 +882,16 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-10 mb-12 md:mb-16">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2.5 mb-5">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#00B894] to-[#00CEC9] flex items-center justify-center shadow-lg">
-                  <ShoppingCart className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-lg font-black text-white">CODAPOS</span>
+                {cmsBranding?.logo_url ? (
+                  <img src={cmsBranding.logo_url} alt={cmsBranding.site_title || 'CODAPOS'} className="h-10 max-w-[180px] object-contain brightness-0 invert" />
+                ) : (
+                  <>
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#00B894] to-[#00CEC9] flex items-center justify-center shadow-lg">
+                      <ShoppingCart className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-lg font-black text-white">{cmsBranding?.site_title || 'CODAPOS'}</span>
+                  </>
+                )}
               </div>
               <p className="text-sm text-gray-400 leading-relaxed mb-5">{t("footer.desc")}</p>
               <div className="flex gap-3">
@@ -842,7 +916,7 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="border-t border-gray-800 pt-6 md:pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs md:text-sm text-gray-500">&copy; 2025 CODAPOS. {t("footer.rights")}</p>
+            <p className="text-xs md:text-sm text-gray-500">&copy; 2025 {cmsBranding?.site_title || 'CODAPOS'}. {t("footer.rights")}</p>
             <div className="flex items-center gap-4 md:gap-6">
               <Link href="/privacy" className="text-xs text-gray-500 hover:text-gray-300 transition">{t("footer.privacy")}</Link>
               <Link href="/terms" className="text-xs text-gray-500 hover:text-gray-300 transition">{t("footer.terms")}</Link>

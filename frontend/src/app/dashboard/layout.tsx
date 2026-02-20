@@ -62,18 +62,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [showFtux, setShowFtux] = useState(false);
     const [showTour, setShowTour] = useState(false);
 
-    // Check if FTUX should be shown (OWNER role + first time)
+    // FTUX and ProductTour disabled — no longer auto-show overlays
+    // Users can re-enable via settings if needed
     useEffect(() => {
-        if (typeof window !== 'undefined' && user) {
-            const ftuxDone = localStorage.getItem('codapos_ftux_done');
-            if (!ftuxDone && user.role === 'owner') {
-                setShowFtux(true);
-            } else if (ftuxDone && !localStorage.getItem('codapos_tour_done') && user.role === 'owner') {
-                // FTUX done but tour not done -> show tour
-                setShowTour(true);
-            }
+        if (typeof window !== 'undefined') {
+            // Mark as done so overlays never block the dashboard
+            localStorage.setItem('codapos_ftux_done', 'true');
+            localStorage.setItem('codapos_tour_done', 'true');
         }
-    }, [user]);
+    }, []);
 
     // Poll active delivery order count for MyKurir badge
     const fetchDeliveryCount = useCallback(async () => {
@@ -134,7 +131,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {showTour && !showFtux && (
                 <ProductTour onComplete={() => setShowTour(false)} />
             )}
-            <div className="min-h-screen flex bg-[#0a0a0f] bg-pattern overflow-x-hidden">
+            <div className="min-h-screen flex bg-[#0a0a0f] overflow-x-hidden isolate">
                 {/* Mobile overlay */}
                 {mobileOpen && (
                     <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
@@ -247,9 +244,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </aside>
 
                 {/* Main Content */}
-                <div className="flex-1 min-h-screen flex flex-col">
+                <div className="flex-1 min-h-screen flex flex-col relative z-20 pointer-events-auto">
                     {/* Top bar */}
-                    <header className="sticky top-0 z-30 glass-subtle h-14 md:h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/5">
+                    <header className="sticky top-0 z-30 glass-subtle h-14 md:h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/5 pointer-events-auto">
                         <button onClick={() => setMobileOpen(true)} className="lg:hidden text-white/50 hover:text-white">
                             <Menu className="w-6 h-6" />
                         </button>
@@ -261,7 +258,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </header>
 
                     {/* Page content */}
-                    <main className="flex-1 p-3 sm:p-4 md:p-6 bg-gradient-mesh">
+                    <main className="flex-1 p-3 sm:p-4 md:p-6 relative z-10 pointer-events-auto">
                         {children}
                     </main>
                 </div>
