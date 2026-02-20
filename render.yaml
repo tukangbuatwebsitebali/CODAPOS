@@ -1,0 +1,31 @@
+# render.yaml — Render Blueprint for CODAPOS Backend
+services:
+  - type: web
+    name: codapos-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    region: singapore
+    plan: free
+    branch: master
+    envVars:
+      - key: APP_PORT
+        value: 8080
+      - key: APP_ENV
+        value: production
+      - key: DB_HOST
+        value: ep-sweet-dawn-a1p2zzow-pooler.ap-southeast-1.aws.neon.tech
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_USER
+        value: neondb_owner
+      - key: DB_PASSWORD
+        value: npg_BTEsCNiFf61I
+      - key: DB_NAME
+        value: neondb
+      - key: DB_SSLMODE
+        value: require
+      - key: JWT_SECRET
+        value: codapos-secret-key-change-in-production
+      - key: JWT_EXPIRY_HOURS
+        value: "24"
