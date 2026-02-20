@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
     Search, Plus, Edit3, Trash2, Package, Filter,
     Grid2X2, List, X, Loader2, AlertCircle, Tag,
-    ImagePlus, Upload,
+    ImagePlus, Upload, ArrowRight, CheckSquare, Square,
 } from "lucide-react";
 import { productAPI, categoryAPI, inventoryAPI, outletAPI } from "@/lib/api";
 import { Product, Category, InventoryItem, Outlet } from "@/types";
@@ -31,6 +31,15 @@ export default function ProductsPage() {
     const [stockMap, setStockMap] = useState<Record<string, number>>({});
     const [outlets, setOutlets] = useState<Outlet[]>([]);
     const [selectedOutlet, setSelectedOutlet] = useState<string>("");
+
+    // Scroll hint tooltip
+    const [showScrollHint, setShowScrollHint] = useState(false);
+    const scrollHintTimer = useRef<NodeJS.Timeout | null>(null);
+
+    // Multi-select state
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+    const [bulkDeleting, setBulkDeleting] = useState(false);
 
     // Product modal state
     const [showModal, setShowModal] = useState(false);
@@ -144,6 +153,17 @@ export default function ProductsPage() {
         }).catch(() => { });
     }, [fetchProducts, fetchCategories]);
 
+    // Show scroll hint on first visit
+    useEffect(() => {
+        const key = 'codapos_scroll_hint_seen';
+        if (!localStorage.getItem(key)) {
+            setShowScrollHint(true);
+            localStorage.setItem(key, '1');
+            scrollHintTimer.current = setTimeout(() => setShowScrollHint(false), 6000);
+        }
+        return () => { if (scrollHintTimer.current) clearTimeout(scrollHintTimer.current); };
+    }, []);
+
     // Fetch stock data when outlet changes
     useEffect(() => {
         if (!selectedOutlet) return;
@@ -244,6 +264,35 @@ export default function ProductsPage() {
             fetchProducts();
         } catch {
             setError("Gagal menghapus produk");
+        }
+    };
+
+    // Multi-select helpers
+    const toggleSelect = (id: string) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id); else next.add(id);
+            return next;
+        });
+    };
+    const toggleSelectAll = () => {
+        if (selectedIds.size === products.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(products.map(p => p.id)));
+        }
+    };
+    const handleBulkDelete = async () => {
+        setBulkDeleting(true);
+        try {
+            await Promise.all(Array.from(selectedIds).map(id => productAPI.delete(id)));
+            setSelectedIds(new Set());
+            setBulkDeleteConfirm(false);
+            fetchProducts();
+        } catch {
+            setError("Gagal menghapus beberapa produk");
+        } finally {
+            setBulkDeleting(false);
         }
     };
 
@@ -400,84 +449,106 @@ export default function ProductsPage() {
                             </button>
                         </div>
                     ) : viewMode === "list" ? (
-                        /* Product Table */
-                        <div className="glass p-0 overflow-x-auto rounded-2xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                            <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
-                                <table className="table-glass min-w-[700px]">
-                                    <thead>
-                                        <tr>
-                                            <th>Produk</th>
-                                            <th className="mobile-hide">SKU</th>
-                                            <th className="mobile-hide">Kategori</th>
-                                            <th>Harga</th>
-                                            <th className="mobile-hide">Biaya</th>
-                                            <th className="text-right mobile-hide">Stok</th>
-                                            <th>Status</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {products.map((product) => {
-                                            const status = getStatusBadge(product);
-                                            return (
-                                                <tr key={product.id}>
-                                                    <td>
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden flex-shrink-0">
-                                                                {product.image_url ? (
-                                                                    <img src={resolveImageUrl(product.image_url)} alt={product.name} className="w-full h-full object-cover" />
-                                                                ) : (
-                                                                    <Package className="w-5 h-5 text-white/20" />
-                                                                )}
-                                                            </div>
-                                                            <div className="min-w-0">
-                                                                <span className="font-medium text-white text-sm">{product.name}</span>
-                                                                {product.description && (
-                                                                    <p className="text-xs text-white/30 truncate max-w-[150px] sm:max-w-[200px]">{product.description}</p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="font-mono text-white/50 text-sm mobile-hide">{product.sku || "—"}</td>
-                                                    <td className="mobile-hide">
-                                                        {product.category ? (
-                                                            <span className="badge badge-info">{product.category.name}</span>
-                                                        ) : (
-                                                            <span className="text-white/20 text-sm">—</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="font-medium text-white text-sm">{formatCurrency(product.base_price)}</td>
-                                                    <td className="text-white/40 mobile-hide">{formatCurrency(product.cost_price)}</td>
-                                                    <td className="text-right mobile-hide">
-                                                        {product.track_stock ? (
-                                                            <span className={`text-sm font-bold ${(stockMap[product.id] ?? 0) <= 0 ? "text-red-400" : "text-white"}`}>
-                                                                {(stockMap[product.id] ?? 0).toLocaleString("id-ID")}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-white/20 text-xs">—</span>
-                                                        )}
-                                                    </td>
-                                                    <td><span className={`badge ${status.class}`}>{status.label}</span></td>
-                                                    <td>
-                                                        <div className="flex gap-1">
-                                                            <button onClick={() => openEditModal(product)} className="btn-ghost p-2">
-                                                                <Edit3 className="w-4 h-4" />
+                        /* Scroll Hint Tooltip */
+                        <>
+                            {showScrollHint && (
+                                <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm animate-fade-in mb-3">
+                                    <ArrowRight className="w-4 h-4 flex-shrink-0 animate-pulse" />
+                                    <span>👆 Geser tabel ke kanan untuk melihat semua kolom produk</span>
+                                    <button onClick={() => setShowScrollHint(false)} className="ml-auto flex-shrink-0">
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            )}
+                            {/* Product Table */}
+                            <div className="glass p-0 overflow-x-auto rounded-2xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                                <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                                    <table className="table-glass min-w-[700px]">
+                                        <thead>
+                                            <tr>
+                                                <th className="w-10">
+                                                    <button onClick={toggleSelectAll} className="text-white/40 hover:text-white transition p-0.5">
+                                                        {selectedIds.size === products.length && products.length > 0 ? <CheckSquare className="w-4 h-4 text-[#1DA1F2]" /> : <Square className="w-4 h-4" />}
+                                                    </button>
+                                                </th>
+                                                <th>Produk</th>
+                                                <th className="mobile-hide">SKU</th>
+                                                <th className="mobile-hide">Kategori</th>
+                                                <th>Harga</th>
+                                                <th className="mobile-hide">Biaya</th>
+                                                <th className="text-right mobile-hide">Stok</th>
+                                                <th>Status</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {products.map((product) => {
+                                                const status = getStatusBadge(product);
+                                                return (
+                                                    <tr key={product.id} className={selectedIds.has(product.id) ? 'bg-[#1DA1F2]/5' : ''}>
+                                                        <td>
+                                                            <button onClick={() => toggleSelect(product.id)} className="text-white/40 hover:text-white transition p-0.5">
+                                                                {selectedIds.has(product.id) ? <CheckSquare className="w-4 h-4 text-[#1DA1F2]" /> : <Square className="w-4 h-4" />}
                                                             </button>
-                                                            <button
-                                                                onClick={() => setDeleteConfirm(product.id)}
-                                                                className="btn-ghost p-2 hover:text-red-400"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
+                                                        </td>
+                                                        <td>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                                                    {product.image_url ? (
+                                                                        <img src={resolveImageUrl(product.image_url)} alt={product.name} className="w-full h-full object-cover" />
+                                                                    ) : (
+                                                                        <Package className="w-5 h-5 text-white/20" />
+                                                                    )}
+                                                                </div>
+                                                                <div className="min-w-0">
+                                                                    <span className="font-medium text-white text-sm">{product.name}</span>
+                                                                    {product.description && (
+                                                                        <p className="text-xs text-white/30 truncate max-w-[150px] sm:max-w-[200px]">{product.description}</p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="font-mono text-white/50 text-sm mobile-hide">{product.sku || "—"}</td>
+                                                        <td className="mobile-hide">
+                                                            {product.category ? (
+                                                                <span className="badge badge-info">{product.category.name}</span>
+                                                            ) : (
+                                                                <span className="text-white/20 text-sm">—</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="font-medium text-white text-sm">{formatCurrency(product.base_price)}</td>
+                                                        <td className="text-white/40 mobile-hide">{formatCurrency(product.cost_price)}</td>
+                                                        <td className="text-right mobile-hide">
+                                                            {product.track_stock ? (
+                                                                <span className={`text-sm font-bold ${(stockMap[product.id] ?? 0) <= 0 ? "text-red-400" : "text-white"}`}>
+                                                                    {(stockMap[product.id] ?? 0).toLocaleString("id-ID")}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-white/20 text-xs">—</span>
+                                                            )}
+                                                        </td>
+                                                        <td><span className={`badge ${status.class}`}>{status.label}</span></td>
+                                                        <td>
+                                                            <div className="flex gap-1">
+                                                                <button onClick={() => openEditModal(product)} className="btn-ghost p-2">
+                                                                    <Edit3 className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setDeleteConfirm(product.id)}
+                                                                    className="btn-ghost p-2 hover:text-red-400"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
+                        </>
                     ) : (
                         /* Grid View */
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 animate-fade-in">
@@ -562,6 +633,47 @@ export default function ProductsPage() {
                             ))}
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* ==================== FLOATING BULK ACTION BAR ==================== */}
+            {selectedIds.size > 0 && (
+                <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-40 animate-slide-in-up">
+                    <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-[#1a1a2e]/95 border border-white/10 backdrop-blur-xl shadow-2xl">
+                        <span className="text-sm text-white font-medium whitespace-nowrap">
+                            {selectedIds.size} produk dipilih
+                        </span>
+                        <button
+                            onClick={() => setSelectedIds(new Set())}
+                            className="text-xs text-white/40 hover:text-white transition"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            onClick={() => setBulkDeleteConfirm(true)}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition-all"
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Hapus
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ==================== BULK DELETE CONFIRM ==================== */}
+            {bulkDeleteConfirm && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setBulkDeleteConfirm(false)}>
+                    <div className="glass-strong p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold text-white mb-2">Hapus {selectedIds.size} Produk?</h3>
+                        <p className="text-sm text-white/50 mb-6">Semua produk yang dipilih akan dihapus permanen dan tidak dapat dikembalikan.</p>
+                        <div className="flex gap-3">
+                            <button onClick={() => setBulkDeleteConfirm(false)} className="btn-secondary flex-1">Batal</button>
+                            <button onClick={handleBulkDelete} disabled={bulkDeleting} className="btn-primary flex-1 !bg-red-600 flex items-center justify-center gap-2">
+                                {bulkDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                {bulkDeleting ? 'Menghapus...' : `Hapus ${selectedIds.size} Produk`}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
